@@ -15,7 +15,7 @@
     "next": "^15.0.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
-    "ranked-voting-ts": "^1.0.0"
+    "ranked-voting": "^0.0.4"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

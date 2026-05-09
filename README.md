@@ -26,7 +26,7 @@ Stretch: custom candidate lists, RCV-vs-plurality side-by-side, shareable URL sc
 
 - Next.js 15 (App Router) with `output: 'export'` for static deployment.
 - TypeScript + Tailwind.
-- [`ranked-voting-ts`](https://github.com/mikey-t/ranked-voting-ts) for the IRV tabulation algorithm — no need to reimplement.
+- [`ranked-voting`](https://www.npmjs.com/package/ranked-voting) ([repo](https://github.com/mikey-t/ranked-voting-ts), MIT) for the IRV tabulation algorithm — no need to reimplement.
 - Local component state, no backend, no auth.
 - Deploys to Vercel free tier or GitHub Pages.
 
