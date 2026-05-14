@@ -7,10 +7,17 @@ export type Candidate = {
   blurb: string;
 };
 
+export type TransferView = {
+  from: string;
+  to: string | null;
+  votes: number;
+};
+
 export type RoundView = {
   round: number;
   tallies: { name: string; votes: number; eliminated: boolean }[];
-  eliminatedThisRound: string | null;
+  eliminatedThisRound: string[];
+  transfers: TransferView[];
   totalActiveBallots: number;
   threshold: number;
 };
@@ -64,6 +71,7 @@ export function tabulate(
     ballots.map((b) => new UserVotes(b)),
   );
   const result: FinalResult = controller.getFinalResult();
+  const eliminatedBeforeRound = new Set<string>();
 
   const rounds: RoundView[] = result.stageResults.map((stage, idx) => {
     const tallies = candidates.map((c) => {
@@ -75,22 +83,28 @@ export function tabulate(
     const totalActive = tallies.reduce((sum, t) => sum + t.votes, 0);
     const threshold = Math.floor(totalActive / 2) + 1;
 
-    let eliminatedThisRound: string | null = null;
+    const eliminatedThisRound: string[] = [];
     const next = result.stageResults[idx + 1];
     if (next) {
       for (const t of tallies) {
         const nextCount = next.rankedVoteCounts[t.name]?.voteCounts[0] ?? 0;
         if (t.votes > 0 && nextCount === 0) {
           t.eliminated = true;
-          eliminatedThisRound = t.name;
+          eliminatedThisRound.push(t.name);
         }
       }
+    }
+
+    const transfers = buildTransfers(ballots, eliminatedBeforeRound, eliminatedThisRound);
+    for (const name of eliminatedThisRound) {
+      eliminatedBeforeRound.add(name);
     }
 
     return {
       round: idx + 1,
       tallies,
       eliminatedThisRound,
+      transfers,
       totalActiveBallots: totalActive,
       threshold,
     };
@@ -102,4 +116,31 @@ export function tabulate(
     tieOptions: result.tieOptions,
     totalVoters: result.totalNumVoters,
   };
+}
+
+function buildTransfers(
+  ballots: Ballot[],
+  eliminatedBeforeRound: Set<string>,
+  eliminatedThisRound: string[],
+): TransferView[] {
+  if (eliminatedThisRound.length === 0) return [];
+
+  const eliminatedAfterRound = new Set([...eliminatedBeforeRound, ...eliminatedThisRound]);
+  const counts = new Map<string, TransferView>();
+
+  for (const ballot of ballots) {
+    const currentChoice = ballot.find((name) => !eliminatedBeforeRound.has(name));
+    if (!currentChoice || !eliminatedThisRound.includes(currentChoice)) continue;
+
+    const nextChoice = ballot.find((name) => !eliminatedAfterRound.has(name)) ?? null;
+    const key = `${currentChoice}->${nextChoice ?? 'stopped'}`;
+    const existing = counts.get(key);
+    if (existing) {
+      existing.votes += 1;
+    } else {
+      counts.set(key, { from: currentChoice, to: nextChoice, votes: 1 });
+    }
+  }
+
+  return Array.from(counts.values());
 }

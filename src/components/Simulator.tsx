@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { tabulate, type Ballot, type Candidate } from '@/lib/election';
+import { describeBallotJourney } from '@/lib/ballotJourney';
 import { RoundCard } from './RoundCard';
 
 type Ranks = Record<string, number | undefined>;
@@ -56,6 +57,7 @@ export function Simulator({
 
   if (submitted) {
     const view = tabulate(candidates, [...baseBallots, userBallot]);
+    const journey = describeBallotJourney(userBallot, view.rounds, view.winner);
     return (
       <div className="rcv-results">
         <aside className="rcv-your-ballot mb-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
@@ -74,6 +76,18 @@ export function Simulator({
           >
             ← Vote again with different rankings
           </button>
+        </aside>
+
+        <aside className="rcv-ballot-journey mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
+          <p className="text-sm font-medium uppercase tracking-wide text-blue-700">
+            Your ballot&apos;s trip
+          </p>
+          <h2 className="mt-1 text-xl font-bold text-blue-950">{journey.title}</h2>
+          <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-blue-950">
+            {journey.steps.map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
         </aside>
 
         {view.winner && (
@@ -113,8 +127,8 @@ export function Simulator({
     <div className="rcv-ballot-form">
       <section className="rcv-instructions mb-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
         <p className="text-sm text-blue-900">
-          Click a candidate to rank them. Click again to remove them. You don&apos;t have to rank
-          all four — leaving someone unranked is the same as not voting for them.
+          Pick your favorite first. Then pick your next choices. You can rank one, two, three, or
+          all four people. If you leave someone blank, your ballot will not move to that person.
         </p>
       </section>
 
