@@ -2,15 +2,13 @@
 
 A voter-education simulator for ranked-choice voting. Rank a sample election, see what happens to your ballot round-by-round, get a plain-language explanation of why.
 
-Built for [UpVote Virginia](https://www.upvotevirginia.org/) as the first target user, but the whole thing forks cleanly for any state.
+Built for Virginia, forks cleanly for any state.
 
-**Status:** Building (skeleton bootstrapped, MVP not yet shipped).
+**Status:** MVP features built — click-to-rank ballot, round-by-round tally, plain-language explanations. Pending: mobile QA, public deploy.
 
 ## Why this exists
 
 After surveying the open-source RCV landscape (FairVote, NYC Civic Engagement Commission, GitHub) the voter-education shape was missing. There are tabulator libraries, results visualizers, poll-running platforms, and voting-method comparison sites — but nothing where a curious voter can rank one sample election and walk through what RCV actually does with their ballot. That's the gap this fills.
-
-Full landscape notes live in the [ai-for-good](https://github.com/jerseycheese/ai-for-good) knowledge hub under `projects/rcv-simulator.md`.
 
 ## MVP scope
 
@@ -20,7 +18,7 @@ Full landscape notes live in the [ai-for-good](https://github.com/jerseycheese/a
 - Plain-language explanation per round ("Candidate X had the fewest first-choice votes, so their ballots get redistributed to each voter's second choice.").
 - Mobile-responsive, static-deployed.
 
-Stretch: custom candidate lists, RCV-vs-plurality side-by-side, shareable URL scenarios, embed-friendly version for UpVote VA's site.
+Stretch: custom candidate lists, RCV-vs-plurality side-by-side, shareable URL scenarios, embed-friendly version any org can drop into their site.
 
 ## Stack
 
