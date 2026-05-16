@@ -2,9 +2,9 @@
 
 A voter-education simulator for ranked-choice voting. Rank a sample election, see what happens to your ballot round-by-round, get a plain-language explanation of why.
 
-Built for Virginia, forks cleanly for any state.
+Built for Virginia, but forks cleanly for any state.
 
-**Status:** MVP features built — click-to-rank ballot, round-by-round tally, plain-language explanations. Pending: mobile QA, public deploy.
+**Status:** MVP features built — click-to-rank ballot, round-by-round tally, plain-language explanations. Next up: mobile QA, then a public deploy.
 
 ## Why this exists
 
