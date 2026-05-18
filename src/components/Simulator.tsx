@@ -168,7 +168,7 @@ export function Simulator({
         })}
       </ol>
 
-      <div className="rcv-submit-row mt-6 flex items-center gap-3">
+      <div className="rcv-submit-row mt-6 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
         <button
           type="button"
           disabled={rankedCount === 0}
