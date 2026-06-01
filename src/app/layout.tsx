@@ -35,7 +35,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
-      <body className="rcv-app rcv-grain relative min-h-screen antialiased">{children}</body>
+      <body
+        className="rcv-app rcv-grain relative min-h-screen antialiased"
+        suppressHydrationWarning
+      >
+        {children}
+      </body>
     </html>
   );
 }
