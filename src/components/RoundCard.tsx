@@ -93,7 +93,7 @@ export function RoundCard({
                       out
                     </span>
                   )}
-                  {isYou && !t.eliminated && (
+                  {isYou && (
                     <span className="rcv-you-tag font-mono text-[0.625rem] font-semibold uppercase tracking-wide text-federal">
                       ◂ your vote
                     </span>
@@ -114,7 +114,10 @@ export function RoundCard({
                     }
                   />
                   {isWinningThisRound && (
-                    <span className="rcv-win-tag absolute inset-y-0 right-2 z-10 flex items-center font-mono text-[0.625rem] font-bold uppercase tracking-wide text-white">
+                    <span
+                      className="rcv-win-tag absolute inset-y-0 left-0 z-10 flex items-center justify-end pr-2 font-mono text-[0.625rem] font-bold uppercase tracking-wide text-white"
+                      style={{ right: `${100 - pct}%` }}
+                    >
                       wins ✓
                     </span>
                   )}
