@@ -29,6 +29,11 @@ export type ElectionView = {
   totalVoters: number;
 };
 
+export type RenamedElection = {
+  candidates: Candidate[];
+  ballots: Ballot[];
+};
+
 export const sampleElection: {
   title: string;
   context: string;
@@ -58,6 +63,20 @@ export const sampleElection: {
 
 function repeat<T>(value: T, n: number): T[] {
   return Array.from({ length: n }, () => value);
+}
+
+export function renameElection(
+  candidates: Candidate[],
+  ballots: Ballot[],
+  renameMap: Record<string, string>,
+): RenamedElection {
+  return {
+    candidates: candidates.map((candidate) => ({
+      ...candidate,
+      name: renameMap[candidate.name] ?? candidate.name,
+    })),
+    ballots: ballots.map((ballot) => ballot.map((name) => renameMap[name] ?? name)),
+  };
 }
 
 export function tabulate(
