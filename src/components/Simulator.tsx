@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { tabulate, type Ballot, type Candidate } from '@/lib/election';
+import { renameElection, tabulate, type Ballot, type Candidate } from '@/lib/election';
 import { describeBallotJourney } from '@/lib/ballotJourney';
-import { buildColorMap } from '@/lib/colors';
+import { buildColorMap, type ColorMap } from '@/lib/colors';
 import { traceUserBallot } from '@/lib/ballotTrace';
 import { RoundCard } from './RoundCard';
 
 type Ranks = Record<string, number | undefined>;
+type CandidateNames = Record<string, string>;
 
 function nextRank(ranks: Ranks): number {
   const used = new Set(Object.values(ranks).filter((r): r is number => typeof r === 'number'));
@@ -28,6 +29,10 @@ function unrank(ranks: Ranks, name: string): Ranks {
   return next;
 }
 
+function defaultNames(candidates: Candidate[]): CandidateNames {
+  return Object.fromEntries(candidates.map((c) => [c.name, c.name]));
+}
+
 export function Simulator({
   candidates,
   baseBallots,
@@ -36,15 +41,28 @@ export function Simulator({
   baseBallots: Ballot[];
 }) {
   const [ranks, setRanks] = useState<Ranks>({});
+  const [names, setNames] = useState<CandidateNames>(() => defaultNames(candidates));
   const [submitted, setSubmitted] = useState(false);
 
+  // Colors are keyed by the original (stable) name so a candidate keeps the
+  // same hue no matter what it's renamed to.
   const colorMap = buildColorMap(candidates);
   const rankedCount = Object.values(ranks).filter((r) => typeof r === 'number').length;
+
+  // Original name -> effective display name (trimmed, falls back to original).
+  const effectiveName: CandidateNames = Object.fromEntries(
+    candidates.map((c) => [c.name, names[c.name]?.trim() || c.name]),
+  );
+  const effectiveList = candidates.map((c) => effectiveName[c.name]);
+  const duplicateNames = new Set(
+    effectiveList.filter((name, i) => effectiveList.indexOf(name) !== i),
+  );
+  const canSubmit = rankedCount > 0 && duplicateNames.size === 0;
 
   const userBallot: Ballot = candidates
     .filter((c) => typeof ranks[c.name] === 'number')
     .sort((a, b) => (ranks[a.name] as number) - (ranks[b.name] as number))
-    .map((c) => c.name);
+    .map((c) => effectiveName[c.name]);
 
   function toggleRank(name: string) {
     setRanks((prev) => {
@@ -59,14 +77,20 @@ export function Simulator({
   }
 
   if (submitted) {
-    const view = tabulate(candidates, [...baseBallots, userBallot]);
+    // Tabulate against the renamed election; colors re-key onto the new names
+    // by position, so each candidate keeps its hue from the ballot form.
+    const renamed = renameElection(candidates, baseBallots, effectiveName);
+    const resultColors: ColorMap = buildColorMap(renamed.candidates);
+    const view = tabulate(renamed.candidates, [...renamed.ballots, userBallot]);
     const journey = describeBallotJourney(userBallot, view.rounds, view.winner);
     const maxScale = view.rounds[0]?.totalActiveBallots ?? 1;
     const trace = traceUserBallot(userBallot, view.rounds);
 
     return (
       <div className="rcv-results relative z-10">
-        <Legend candidates={candidates} colorMap={colorMap} />
+        <Legend
+          items={renamed.candidates.map((c) => ({ name: c.name, color: resultColors[c.name] }))}
+        />
 
         <aside className="rcv-ballot-journey rcv-fade-up mb-6 border-l-2 border-federal bg-surface p-5">
           <p className="font-mono text-xs font-semibold uppercase tracking-widest text-federal">
@@ -90,7 +114,7 @@ export function Simulator({
                   <span className="font-mono text-xs font-semibold text-ink">{i + 1}</span>
                   <span
                     className="h-2.5 w-2.5 rounded-[2px]"
-                    style={{ backgroundColor: colorMap[name] }}
+                    style={{ backgroundColor: resultColors[name] }}
                     aria-hidden="true"
                   />
                   {name}
@@ -110,11 +134,11 @@ export function Simulator({
         {view.winner && (
           <aside
             className="rcv-winner-banner rcv-fade-up mb-8 flex items-center gap-4 border-l-2 bg-surface p-5"
-            style={{ borderColor: colorMap[view.winner], ['--i' as string]: 1 }}
+            style={{ borderColor: resultColors[view.winner], ['--i' as string]: 1 }}
           >
             <span
               className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-2xl text-white"
-              style={{ backgroundColor: colorMap[view.winner] }}
+              style={{ backgroundColor: resultColors[view.winner] }}
               aria-hidden="true"
             >
               ✓
@@ -153,7 +177,7 @@ export function Simulator({
               key={round.round}
               round={round}
               isFinalRound={idx === view.rounds.length - 1}
-              colorMap={colorMap}
+              colorMap={resultColors}
               maxScale={maxScale}
               youSupport={trace[idx]}
             />
@@ -165,12 +189,15 @@ export function Simulator({
 
   return (
     <div className="rcv-ballot-form relative z-10">
-      <Legend candidates={candidates} colorMap={colorMap} />
+      <Legend
+        items={candidates.map((c) => ({ name: effectiveName[c.name], color: colorMap[c.name] }))}
+      />
 
       <section className="rcv-instructions mb-5 border-l-2 border-federal bg-surface p-4">
         <p className="text-sm leading-relaxed text-ink">
-          Pick your favorite first. Then pick your next choices. You can rank one, two, three, or
-          all four people. If you leave someone blank, your ballot will not move to that person.
+          Pick your favorite first, then your next choices — rank one, two, three, or all four. If
+          you leave someone blank, your ballot will not move to that person. You can also rename the
+          candidates to something familiar; the colors stay put.
         </p>
       </section>
 
@@ -179,42 +206,67 @@ export function Simulator({
           const rank = ranks[c.name];
           const isRanked = typeof rank === 'number';
           const color = colorMap[c.name];
+          const isDuplicate = duplicateNames.has(effectiveName[c.name]);
           return (
             <li key={c.name}>
-              <button
-                type="button"
-                onClick={() => toggleRank(c.name)}
-                className={`rcv-candidate-button flex w-full items-center gap-3 rounded-sm border p-4 text-left transition ${
-                  isRanked
-                    ? 'border-federal bg-federal-soft'
-                    : 'border-rule bg-surface hover:border-ink-soft'
+              <div
+                className={`rcv-candidate-card rounded-sm border transition ${
+                  isRanked ? 'border-federal bg-federal-soft' : 'border-rule bg-surface'
                 }`}
                 style={isRanked ? { borderLeftColor: color, borderLeftWidth: '3px' } : undefined}
               >
-                <span
-                  className="rcv-rank-pip flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-mono text-sm font-bold"
-                  style={
-                    isRanked
-                      ? { backgroundColor: color, color: '#fff' }
-                      : { border: '1px dashed var(--rule)', color: 'var(--ink-soft)' }
-                  }
+                <button
+                  type="button"
+                  onClick={() => toggleRank(c.name)}
+                  className="rcv-candidate-button flex w-full items-center gap-3 p-4 text-left"
                 >
-                  {isRanked ? rank : '–'}
-                </span>
-                <span className="min-w-0">
-                  <span className="rcv-candidate-name flex items-center gap-1.5 font-semibold text-ink">
-                    <span
-                      className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
-                      style={{ backgroundColor: color }}
-                      aria-hidden="true"
+                  <span
+                    className="rcv-rank-pip flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-mono text-sm font-bold"
+                    style={
+                      isRanked
+                        ? { backgroundColor: color, color: '#fff' }
+                        : { border: '1px dashed var(--rule)', color: 'var(--ink-soft)' }
+                    }
+                  >
+                    {isRanked ? rank : '–'}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="rcv-candidate-name flex items-center gap-1.5 font-semibold text-ink">
+                      <span
+                        className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                        style={{ backgroundColor: color }}
+                        aria-hidden="true"
+                      />
+                      {effectiveName[c.name]}
+                    </span>
+                    <span className="rcv-candidate-blurb mt-0.5 block text-xs text-ink-soft">
+                      {c.blurb}
+                    </span>
+                  </span>
+                </button>
+
+                <div className="rcv-rename border-t border-rule px-4 pb-3 pt-2.5">
+                  <label className="block font-mono text-[0.625rem] font-semibold uppercase tracking-widest text-ink-soft">
+                    Rename
+                    <input
+                      type="text"
+                      value={names[c.name]}
+                      placeholder={c.name}
+                      onChange={(e) => {
+                        const value = e.currentTarget.value;
+                        setNames((prev) => ({ ...prev, [c.name]: value }));
+                      }}
+                      aria-label={`Rename ${c.name}`}
+                      className={`rcv-rename-input mt-1 w-full rounded-sm border bg-surface px-2.5 py-1.5 text-sm font-normal normal-case tracking-normal text-ink outline-none transition focus:border-federal ${
+                        isDuplicate ? 'border-flag-red' : 'border-rule'
+                      }`}
                     />
-                    {c.name}
-                  </span>
-                  <span className="rcv-candidate-blurb mt-0.5 block text-xs text-ink-soft">
-                    {c.blurb}
-                  </span>
-                </span>
-              </button>
+                  </label>
+                  {isDuplicate && (
+                    <p className="mt-1.5 text-xs text-flag-red">Names must be unique.</p>
+                  )}
+                </div>
+              </div>
             </li>
           );
         })}
@@ -223,7 +275,7 @@ export function Simulator({
       <div className="rcv-submit-row mt-6 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-4">
         <button
           type="button"
-          disabled={rankedCount === 0}
+          disabled={!canSubmit}
           onClick={() => setSubmitted(true)}
           className="rcv-submit rounded-sm bg-federal px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-ink disabled:cursor-not-allowed disabled:bg-eliminated"
         >
@@ -238,31 +290,32 @@ export function Simulator({
             Clear
           </button>
         )}
+        <button
+          type="button"
+          onClick={() => setNames(defaultNames(candidates))}
+          className="rcv-reset-names font-mono text-xs font-semibold uppercase tracking-wide text-ink-soft hover:underline sm:ml-auto"
+        >
+          Reset names
+        </button>
       </div>
     </div>
   );
 }
 
-function Legend({
-  candidates,
-  colorMap,
-}: {
-  candidates: Candidate[];
-  colorMap: ReturnType<typeof buildColorMap>;
-}) {
+function Legend({ items }: { items: { name: string; color: string }[] }) {
   return (
     <div className="rcv-legend mb-5 flex flex-wrap items-center gap-x-4 gap-y-2 border-y border-rule py-2.5">
       <span className="font-mono text-[0.625rem] uppercase tracking-widest text-ink-soft">
         Candidates
       </span>
-      {candidates.map((c) => (
-        <span key={c.name} className="flex items-center gap-1.5 text-xs font-medium text-ink">
+      {items.map((item) => (
+        <span key={item.name} className="flex items-center gap-1.5 text-xs font-medium text-ink">
           <span
             className="h-2.5 w-2.5 rounded-[2px]"
-            style={{ backgroundColor: colorMap[c.name] }}
+            style={{ backgroundColor: item.color }}
             aria-hidden="true"
           />
-          {c.name}
+          {item.name}
         </span>
       ))}
     </div>

@@ -60,6 +60,29 @@ function repeat<T>(value: T, n: number): T[] {
   return Array.from({ length: n }, () => value);
 }
 
+export type RenamedElection = {
+  candidates: Candidate[];
+  ballots: Ballot[];
+};
+
+// Presentation-only: candidate names are the ballot identity (ballots are
+// arrays of name strings), so renaming a candidate means rewriting every
+// ballot that references the old name. Keeps the original name as the stable
+// key on the caller side; this just produces a renamed copy to tabulate.
+export function renameElection(
+  candidates: Candidate[],
+  ballots: Ballot[],
+  renameMap: Record<string, string>,
+): RenamedElection {
+  return {
+    candidates: candidates.map((candidate) => ({
+      ...candidate,
+      name: renameMap[candidate.name] ?? candidate.name,
+    })),
+    ballots: ballots.map((ballot) => ballot.map((name) => renameMap[name] ?? name)),
+  };
+}
+
 export function tabulate(
   candidates: Candidate[],
   ballots: Ballot[],
@@ -133,7 +156,9 @@ function buildTransfers(
     if (!currentChoice || !eliminatedThisRound.includes(currentChoice)) continue;
 
     const nextChoice = ballot.find((name) => !eliminatedAfterRound.has(name)) ?? null;
-    const key = `${currentChoice}->${nextChoice ?? 'stopped'}`;
+    // Structural key so candidate names containing "->" or the literal
+    // "stopped" can't collide distinct transfer paths (names are user-editable).
+    const key = JSON.stringify([currentChoice, nextChoice]);
     const existing = counts.get(key);
     if (existing) {
       existing.votes += 1;

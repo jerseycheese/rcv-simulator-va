@@ -15,7 +15,9 @@ const PALETTE = [
 export type ColorMap = Record<string, string>;
 
 export function buildColorMap(candidates: Candidate[]): ColorMap {
-  const map: ColorMap = {};
+  // Null-prototype map: candidate names are user-editable, so a name like
+  // "__proto__" must be a plain key rather than hitting the object prototype.
+  const map: ColorMap = Object.create(null);
   candidates.forEach((c, i) => {
     map[c.name] = PALETTE[i % PALETTE.length];
   });
