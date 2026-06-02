@@ -60,6 +60,29 @@ function repeat<T>(value: T, n: number): T[] {
   return Array.from({ length: n }, () => value);
 }
 
+export type RenamedElection = {
+  candidates: Candidate[];
+  ballots: Ballot[];
+};
+
+// Presentation-only: candidate names are the ballot identity (ballots are
+// arrays of name strings), so renaming a candidate means rewriting every
+// ballot that references the old name. Keeps the original name as the stable
+// key on the caller side; this just produces a renamed copy to tabulate.
+export function renameElection(
+  candidates: Candidate[],
+  ballots: Ballot[],
+  renameMap: Record<string, string>,
+): RenamedElection {
+  return {
+    candidates: candidates.map((candidate) => ({
+      ...candidate,
+      name: renameMap[candidate.name] ?? candidate.name,
+    })),
+    ballots: ballots.map((ballot) => ballot.map((name) => renameMap[name] ?? name)),
+  };
+}
+
 export function tabulate(
   candidates: Candidate[],
   ballots: Ballot[],

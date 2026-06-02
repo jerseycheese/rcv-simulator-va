@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { sampleElection, tabulate } from '../src/lib/election.ts';
+import { renameElection, sampleElection, tabulate } from '../src/lib/election.ts';
 
 test('tracks all candidates who are eliminated after a round', () => {
   const userBallot = ['Dale Hutchins'];
@@ -20,4 +20,21 @@ test('counts where eliminated ballots go next', () => {
     { from: 'Dale Hutchins', to: 'Brent Walker', votes: 1 },
     { from: 'Dale Hutchins', to: null, votes: 1 },
   ]);
+});
+
+test('renamed candidates flow through tabulation and transfers', () => {
+  const renameMap = { 'Aisha Patel': 'Sam', 'Carmen Ortiz': 'Lee' };
+  const { candidates, ballots } = renameElection(
+    sampleElection.candidates,
+    sampleElection.ballots,
+    renameMap,
+  );
+
+  const view = tabulate(candidates, [...ballots, ['Lee']]);
+
+  // Original-name candidates are gone; renamed ones carry their ballots.
+  const names = view.rounds[0].tallies.map((t) => t.name);
+  assert.ok(names.includes('Sam') && names.includes('Lee'));
+  assert.ok(!names.includes('Aisha Patel') && !names.includes('Carmen Ortiz'));
+  assert.equal(view.winner, 'Sam');
 });
