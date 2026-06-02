@@ -156,7 +156,9 @@ function buildTransfers(
     if (!currentChoice || !eliminatedThisRound.includes(currentChoice)) continue;
 
     const nextChoice = ballot.find((name) => !eliminatedAfterRound.has(name)) ?? null;
-    const key = `${currentChoice}->${nextChoice ?? 'stopped'}`;
+    // Structural key so candidate names containing "->" or the literal
+    // "stopped" can't collide distinct transfer paths (names are user-editable).
+    const key = JSON.stringify([currentChoice, nextChoice]);
     const existing = counts.get(key);
     if (existing) {
       existing.votes += 1;

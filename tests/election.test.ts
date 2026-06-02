@@ -38,3 +38,22 @@ test('renamed candidates flow through tabulation and transfers', () => {
   assert.ok(!names.includes('Aisha Patel') && !names.includes('Carmen Ortiz'));
   assert.equal(view.winner, 'Sam');
 });
+
+test('a candidate named "stopped" does not collide with exhausted ballots', () => {
+  // Renaming is unrestricted, so a transfer to a candidate literally named
+  // "stopped" must stay distinct from an exhausted (null) transfer.
+  const candidates = [
+    { name: 'A', blurb: '' },
+    { name: 'stopped', blurb: '' },
+    { name: 'B', blurb: '' },
+  ];
+  const ballots = [['A'], ['A', 'stopped'], ['stopped'], ['stopped'], ['stopped'], ['B'], ['B'], ['B']];
+
+  const view = tabulate(candidates, ballots);
+  const transfersFromA = view.rounds[0].transfers.filter((t) => t.from === 'A');
+
+  assert.deepEqual(transfersFromA, [
+    { from: 'A', to: null, votes: 1 },
+    { from: 'A', to: 'stopped', votes: 1 },
+  ]);
+});
