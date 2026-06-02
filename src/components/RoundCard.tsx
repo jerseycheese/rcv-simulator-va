@@ -26,7 +26,7 @@ export function RoundCard({
         {round.round}
       </span>
 
-      <header className="rcv-round-header mb-4 flex items-baseline justify-between gap-3">
+      <header className="rcv-round-header mb-4 flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
         <h3 className="font-display text-base font-bold tracking-tight text-ink">
           Round {round.round}
         </h3>
@@ -35,16 +35,7 @@ export function RoundCard({
         </span>
       </header>
 
-      <div
-        className="rcv-chart relative"
-        style={
-          {
-            '--name-w': '8.25rem',
-            '--count-w': '2.75rem',
-            '--gap': '0.75rem',
-          } as React.CSSProperties
-        }
-      >
+      <div className="rcv-chart relative">
         {/* Majority threshold line, drawn at its true position for this round */}
         <span
           className="rcv-threshold pointer-events-none absolute bottom-0 top-0 z-10 border-l-2 border-dashed border-flag-red/70"
@@ -82,7 +73,7 @@ export function RoundCard({
               >
                 <span className="rcv-candidate-label flex min-w-0 flex-col text-right">
                   <span
-                    className={`truncate text-sm font-semibold ${
+                    className={`text-sm font-semibold ${
                       t.eliminated ? 'text-ink-soft line-through' : 'text-ink'
                     }`}
                   >
