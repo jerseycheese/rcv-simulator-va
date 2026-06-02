@@ -140,7 +140,7 @@ export function RoundCard({
               <ul className="mt-2 space-y-1.5">
                 {round.transfers.map((transfer, i) => (
                   <li
-                    key={`${transfer.from}-${transfer.to ?? 'stopped'}`}
+                    key={JSON.stringify([transfer.from, transfer.to])}
                     className="rcv-transfer-row rcv-fade-up flex items-center gap-2 text-sm"
                     style={{ ['--i' as string]: i }}
                   >
