@@ -1,5 +1,27 @@
 import type { Metadata } from 'next';
+import { Libre_Franklin, Public_Sans, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
+
+const display = Libre_Franklin({
+  subsets: ['latin'],
+  weight: ['700', '800'],
+  variable: '--font-display',
+  display: 'swap',
+});
+
+const body = Public_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-body',
+  display: 'swap',
+});
+
+const mono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['500', '600'],
+  variable: '--font-mono',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'RCV Simulator',
@@ -12,8 +34,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="rcv-app min-h-screen bg-white text-slate-900 antialiased">
+    <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
+      <body
+        className="rcv-app rcv-grain relative min-h-screen antialiased"
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>
