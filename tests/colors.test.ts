@@ -16,3 +16,12 @@ test('wraps the palette when there are more candidates than colors', () => {
   const map = buildColorMap(many);
   assert.equal(map['C6'], map['C0']);
 });
+
+test('handles a candidate renamed to "__proto__"', () => {
+  const map = buildColorMap([
+    { name: '__proto__', blurb: '' },
+    { name: 'Other', blurb: '' },
+  ]);
+  assert.equal(map['__proto__'], 'var(--cand-0)');
+  assert.equal(map['Other'], 'var(--cand-1)');
+});
