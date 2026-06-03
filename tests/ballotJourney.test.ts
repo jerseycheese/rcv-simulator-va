@@ -23,11 +23,13 @@ test('explains when a ballot moves to the next active ranked choice', () => {
 
   const journey = describeBallotJourney(userBallot, view.rounds, view.winner);
 
-  assert.equal(journey.title, 'Your vote helped Aisha Patel in round 2');
+  assert.equal(journey.title, 'Your vote helped Aisha Patel in round 3');
   assert.deepEqual(journey.steps, [
     'Your vote started with Dale Hutchins.',
     'Dale Hutchins was out after round 1.',
-    'Carmen Ortiz was already out, so your vote moved to Aisha Patel in round 2.',
+    'Your vote moved to Carmen Ortiz in round 2.',
+    'Carmen Ortiz was out after round 2.',
+    'Your vote moved to Aisha Patel in round 3.',
     'Aisha Patel won.',
   ]);
 });

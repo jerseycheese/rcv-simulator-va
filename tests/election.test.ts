@@ -1,23 +1,25 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { renameElection, sampleElection, tabulate } from '../src/lib/election.ts';
+import { renameElection, sampleElection, tabulate, tabulatePlurality } from '../src/lib/election.ts';
 
-test('tracks all candidates who are eliminated after a round', () => {
+test('tracks who is eliminated in each round', () => {
   const userBallot = ['Dale Hutchins'];
   const view = tabulate(sampleElection.candidates, [...sampleElection.ballots, userBallot]);
 
-  assert.deepEqual(view.rounds[0].eliminatedThisRound, ['Carmen Ortiz', 'Dale Hutchins']);
+  assert.deepEqual(
+    view.rounds.map((r) => r.eliminatedThisRound),
+    [['Dale Hutchins'], ['Carmen Ortiz'], []],
+  );
 });
 
-test('counts where eliminated ballots go next', () => {
+test('counts where eliminated ballots go next, including exhausted ones', () => {
   const userBallot = ['Dale Hutchins'];
   const view = tabulate(sampleElection.candidates, [...sampleElection.ballots, userBallot]);
 
+  // Dale is out first: his two ranked ballots move to Aisha, the user's
+  // single-choice ballot has nowhere to go and exhausts.
   assert.deepEqual(view.rounds[0].transfers, [
-    { from: 'Carmen Ortiz', to: 'Aisha Patel', votes: 3 },
-    { from: 'Carmen Ortiz', to: 'Brent Walker', votes: 1 },
     { from: 'Dale Hutchins', to: 'Aisha Patel', votes: 2 },
-    { from: 'Dale Hutchins', to: 'Brent Walker', votes: 1 },
     { from: 'Dale Hutchins', to: null, votes: 1 },
   ]);
 });
@@ -56,4 +58,49 @@ test('a candidate named "stopped" does not collide with exhausted ballots', () =
     { from: 'A', to: null, votes: 1 },
     { from: 'A', to: 'stopped', votes: 1 },
   ]);
+});
+
+test('plurality crowns the candidate with the most first choices', () => {
+  const result = tabulatePlurality(sampleElection.candidates, sampleElection.ballots);
+
+  assert.equal(result.winner, 'Brent Walker');
+  assert.equal(result.tieOptions, null);
+  assert.equal(result.tallies[0].name, 'Brent Walker'); // sorted most-first
+  assert.equal(result.totalVotes, 20);
+});
+
+test('plurality and ranked-choice pick different winners on the same ballots', () => {
+  // The whole point of the comparison: this divergence must hold, or the
+  // side-by-side has nothing to teach. Guards the sample election against
+  // edits that would flatten it.
+  const plurality = tabulatePlurality(sampleElection.candidates, sampleElection.ballots);
+  const rcv = tabulate(sampleElection.candidates, sampleElection.ballots);
+
+  assert.equal(plurality.winner, 'Brent Walker');
+  assert.equal(rcv.winner, 'Aisha Patel');
+  assert.notEqual(plurality.winner, rcv.winner);
+});
+
+test('plurality reports a tie when candidates share the lead', () => {
+  const candidates = [
+    { name: 'A', blurb: '' },
+    { name: 'B', blurb: '' },
+    { name: 'C', blurb: '' },
+  ];
+  const result = tabulatePlurality(candidates, [['A'], ['A'], ['B'], ['B'], ['C']]);
+
+  assert.equal(result.winner, null);
+  assert.deepEqual(result.tieOptions, ['A', 'B']);
+});
+
+test('plurality has no winner when every ballot is blank', () => {
+  const candidates = [
+    { name: 'A', blurb: '' },
+    { name: 'B', blurb: '' },
+  ];
+  const result = tabulatePlurality(candidates, [[], [], []]);
+
+  assert.equal(result.winner, null);
+  assert.equal(result.tieOptions, null);
+  assert.equal(result.totalVotes, 0);
 });

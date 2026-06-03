@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { renameElection, tabulate, type Ballot, type Candidate } from '@/lib/election';
+import { renameElection, tabulate, tabulatePlurality, type Ballot, type Candidate } from '@/lib/election';
 import { describeBallotJourney } from '@/lib/ballotJourney';
 import { buildColorMap, type ColorMap } from '@/lib/colors';
 import { traceUserBallot } from '@/lib/ballotTrace';
 import { RoundCard } from './RoundCard';
+import { MethodComparison } from './MethodComparison';
 
 type Ranks = Record<string, number | undefined>;
 type CandidateNames = Record<string, string>;
@@ -82,6 +83,7 @@ export function Simulator({
     const renamed = renameElection(candidates, baseBallots, effectiveName);
     const resultColors: ColorMap = buildColorMap(renamed.candidates);
     const view = tabulate(renamed.candidates, [...renamed.ballots, userBallot]);
+    const plurality = tabulatePlurality(renamed.candidates, [...renamed.ballots, userBallot]);
     const journey = describeBallotJourney(userBallot, view.rounds, view.winner);
     const maxScale = view.rounds[0]?.totalActiveBallots ?? 1;
     const trace = traceUserBallot(userBallot, view.rounds);
@@ -131,41 +133,12 @@ export function Simulator({
           </button>
         </aside>
 
-        {view.winner && (
-          <aside
-            className="rcv-winner-banner rcv-fade-up mb-8 flex items-center gap-4 border-l-2 bg-surface p-5"
-            style={{ borderColor: resultColors[view.winner], ['--i' as string]: 1 }}
-          >
-            <span
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-2xl text-white"
-              style={{ backgroundColor: resultColors[view.winner] }}
-              aria-hidden="true"
-            >
-              ✓
-            </span>
-            <div>
-              <p className="font-mono text-xs font-semibold uppercase tracking-widest text-ink-soft">
-                Winner
-              </p>
-              <p className="font-display text-2xl font-bold tracking-tight text-ink">
-                {view.winner}
-              </p>
-              <p className="mt-0.5 text-sm text-ink-soft">
-                Decided in {view.rounds.length} round{view.rounds.length === 1 ? '' : 's'} from{' '}
-                {view.totalVoters} ballots, including yours.
-              </p>
-            </div>
-          </aside>
-        )}
-
-        {view.tieOptions && (
-          <aside className="rcv-tie-banner rcv-fade-up mb-8 border-l-2 border-flag-red bg-surface p-5">
-            <p className="font-mono text-xs font-semibold uppercase tracking-widest text-flag-red">
-              Tie
-            </p>
-            <p className="mt-1 text-ink">Tie between: {view.tieOptions.join(', ')}.</p>
-          </aside>
-        )}
+        <MethodComparison
+          plurality={plurality}
+          rcv={view}
+          colorMap={resultColors}
+          totalVoters={view.totalVoters}
+        />
 
         <section className="rcv-rounds relative space-y-4 sm:pl-12">
           <span

@@ -29,6 +29,13 @@ export type ElectionView = {
   totalVoters: number;
 };
 
+export type PluralityView = {
+  tallies: { name: string; votes: number }[];
+  winner: string | null;
+  tieOptions: string[] | null;
+  totalVotes: number;
+};
+
 export const sampleElection: {
   title: string;
   context: string;
@@ -45,14 +52,17 @@ export const sampleElection: {
     { name: 'Dale Hutchins', blurb: 'Public safety' },
   ],
   ballots: [
-    ...repeat(['Aisha Patel', 'Brent Walker', 'Carmen Ortiz'], 5),
-    ...repeat(['Aisha Patel', 'Carmen Ortiz', 'Brent Walker'], 2),
-    ...repeat(['Brent Walker', 'Aisha Patel', 'Carmen Ortiz'], 4),
-    ...repeat(['Brent Walker', 'Carmen Ortiz', 'Aisha Patel'], 2),
+    // Brent leads on first choices but his support can't grow past his base.
+    ...repeat(['Brent Walker', 'Dale Hutchins'], 5),
+    ...repeat(['Brent Walker', 'Carmen Ortiz'], 3),
+    // Aisha and Carmen voters rank each other second — the broad public-services
+    // bloc that plurality splits but ranked-choice lets consolidate.
+    ...repeat(['Aisha Patel', 'Carmen Ortiz', 'Brent Walker'], 4),
+    ...repeat(['Aisha Patel', 'Carmen Ortiz', 'Dale Hutchins'], 2),
     ...repeat(['Carmen Ortiz', 'Aisha Patel', 'Brent Walker'], 3),
-    ...repeat(['Carmen Ortiz', 'Brent Walker', 'Aisha Patel'], 1),
-    ...repeat(['Dale Hutchins', 'Aisha Patel', 'Brent Walker'], 2),
-    ...repeat(['Dale Hutchins', 'Carmen Ortiz', 'Brent Walker'], 1),
+    ...repeat(['Carmen Ortiz', 'Aisha Patel', 'Dale Hutchins'], 1),
+    // Dale's handful breaks toward Aisha once he's eliminated.
+    ...repeat(['Dale Hutchins', 'Aisha Patel', 'Carmen Ortiz'], 2),
   ],
 };
 
@@ -80,6 +90,40 @@ export function renameElection(
       name: renameMap[candidate.name] ?? candidate.name,
     })),
     ballots: ballots.map((ballot) => ballot.map((name) => renameMap[name] ?? name)),
+  };
+}
+
+// Plurality ("first past the post"): count only each ballot's first choice and
+// crown whoever has the most. No rounds, no transfers. It's the foil — running
+// the same ballots through plurality and RCV side by side is where the point of
+// ranked-choice voting becomes visible.
+export function tabulatePlurality(
+  candidates: Candidate[],
+  ballots: Ballot[],
+): PluralityView {
+  // Map (not a plain object) so a candidate renamed to "__proto__" is a real key.
+  const counts = new Map<string, number>(candidates.map((c) => [c.name, 0]));
+  for (const ballot of ballots) {
+    const first = ballot[0];
+    if (first !== undefined && counts.has(first)) {
+      counts.set(first, (counts.get(first) ?? 0) + 1);
+    }
+  }
+
+  const tallies = candidates
+    .map((c) => ({ name: c.name, votes: counts.get(c.name) ?? 0 }))
+    .sort((a, b) => b.votes - a.votes);
+
+  const totalVotes = tallies.reduce((sum, t) => sum + t.votes, 0);
+  const top = tallies[0]?.votes ?? 0;
+  // Only a positive top counts as a result — all-blank ballots leave no winner.
+  const leaders = top > 0 ? tallies.filter((t) => t.votes === top).map((t) => t.name) : [];
+
+  return {
+    tallies,
+    winner: leaders.length === 1 ? leaders[0] : null,
+    tieOptions: leaders.length > 1 ? leaders : null,
+    totalVotes,
   };
 }
 
