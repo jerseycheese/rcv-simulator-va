@@ -4,7 +4,7 @@ A voter-education simulator for ranked-choice voting. Rank a sample election, se
 
 Built for Virginia, but forks cleanly for any state.
 
-**Status:** MVP features built — click-to-rank ballot, round-by-round tally, plain-language explanations. Next up: mobile QA, then a public deploy.
+**Status:** Core simulator built — click-to-rank ballot, round-by-round tally, plain-language explanations, candidate renaming, and a plurality-vs-RCV comparison. Next up: a public deploy.
 
 ## Why this exists
 
@@ -18,7 +18,7 @@ After surveying the open-source RCV landscape (FairVote, NYC Civic Engagement Co
 - Plain-language explanation per round ("Candidate X had the fewest first-choice votes, so their ballots get redistributed to each voter's second choice.").
 - Mobile-responsive, static-deployed.
 
-Stretch: custom candidate lists, RCV-vs-plurality side-by-side, shareable URL scenarios, embed-friendly version any org can drop into their site.
+Stretch: shareable URL scenarios, custom candidate lists, embed-friendly version any org can drop into their site.
 
 ## Stack
 
