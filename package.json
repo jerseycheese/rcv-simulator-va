@@ -5,7 +5,7 @@
   "description": "Voter-education ranked-choice voting simulator. Built for Virginia, forks for any state.",
   "license": "MIT",
   "scripts": {
-    "dev": "next dev",
+    "dev": "bash scripts/dev.sh",
     "build": "next build",
     "start": "next start",
     "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/*.test.ts",
