@@ -21,9 +21,11 @@ Verify: the dev script prints the chosen port; `curl -s localhost:<port> | head 
 ```bash
 npm test             # node --test tests/*.test.ts (Node's built-in runner; TS runs natively)
 npm run type-check   # tsc --noEmit --incremental false
+npm run lint         # eslint . (flat config: next/core-web-vitals + next/typescript)
+npm run format       # prettier --write . (optional; not a gate)
 ```
 
-Both must pass before any commit. Passing: `npm test` reports every test passing with exit 0; type-check exits clean. `npm run lint` exists but is currently broken — see Known failure modes; it rejoins the gate once a config lands.
+Type-check, lint, and tests all must pass before any commit. Passing: `npm test` reports every test passing with exit 0; type-check and lint exit clean. CI (`.github/workflows/ci.yml`) runs the same checks plus the build on every push and PR.
 
 ## Layout
 
@@ -54,7 +56,6 @@ scripts/          dev.sh, worktree-port.cjs, kill-port.sh (port management)
 
 ## Known failure modes
 
-- `npm run lint` hangs or prompts interactively → ESLint 9 and eslint-config-next are installed, but no ESLint config file is committed, so `next lint` tries to scaffold one. Known open task: add an `eslint.config.mjs`; until then the commit gate is tests + type-check.
 - Port already in use → dev.sh frees its own computed port via kill-port.sh; if something else squats on it, `lsof -iTCP:<port>` and deal with that process.
 - Hydration warnings → some were deliberately suppressed; check git history before "fixing" them.
 - `.claude/launch.json` hardcodes port 3000 — only correct for the main checkout.
