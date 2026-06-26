@@ -84,10 +84,7 @@ export function MethodComparison({
           </p>
         </div>
 
-        <div
-          className="rcv-method-rcv rounded-sm border border-l-2 border-rule bg-surface p-5"
-          style={{ borderLeftColor: rcvWinner ? colorMap[rcvWinner] : 'var(--federal)' }}
-        >
+        <div className="rcv-method-rcv rounded-sm border border-rule bg-surface p-5">
           <p className="font-mono text-[0.625rem] font-semibold uppercase tracking-widest text-ink-soft">
             Ranked-choice · every ranking counts
           </p>
@@ -120,7 +117,7 @@ export function MethodComparison({
       </div>
 
       <p
-        className={`rcv-method-takeaway mt-4 border-l-2 bg-surface p-4 text-sm leading-relaxed ${
+        className={`rcv-method-takeaway mt-4 rounded-sm border bg-surface p-4 text-sm leading-relaxed ${
           disagree ? 'border-flag-red text-ink' : 'border-rule text-ink-soft'
         }`}
       >
