@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-26",
+  "title": "Design System: RCV Simulator",
+  "extensions": {
+    "colorMeta": {
+      "federal": { "role": "primary", "displayName": "Federal Blue", "canonical": "#1b3a6b" },
+      "flag-red": { "role": "secondary", "displayName": "Flag Red", "canonical": "#9e2b2b" },
+      "paper": { "role": "neutral", "displayName": "Cool Paper", "canonical": "#f3f5f8" },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#14202e" }
+    },
+    "motion": [
+      { "name": "ease-civic", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Ease-out-expo for fade-up and bar-grow entrances; calm, no bounce." },
+      { "name": "fade-up", "value": "rcv-fade-up 0.55s, stagger 80ms via --i", "purpose": "Round cards and panels rise in on reveal." },
+      { "name": "bar-grow", "value": "rcv-bar-grow 0.7s scaleX from 0", "purpose": "Tally bars grow from the left, staggered 90ms." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single call to action that runs the election.",
+      "html": "<button class=\"ds-btn-primary\">See what happens with my ballot</button>",
+      "css": ".ds-btn-primary { background: var(--federal, #1b3a6b); color: #fff; padding: 0.625rem 1.25rem; border: none; border-radius: 4px; font-weight: 600; font-size: 0.875rem; transition: background 0.2s; } .ds-btn-primary:hover { background: var(--ink, #14202e); } .ds-btn-primary:focus-visible { outline: 2px solid var(--federal, #1b3a6b); outline-offset: 2px; } .ds-btn-primary:disabled { background: var(--eliminated, #9aa6b2); cursor: not-allowed; }"
+    },
+    {
+      "name": "Candidate Card (selected)",
+      "kind": "card",
+      "refersTo": "candidate-card-selected",
+      "description": "A ranked candidate: federal-wash fill, federal border, hue-coded left edge, filled rank pip.",
+      "html": "<div class=\"ds-cand\"><span class=\"ds-pip\">1</span><span class=\"ds-cand-name\"><span class=\"ds-swatch\"></span>Avery Chen</span></div>",
+      "css": ".ds-cand { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: var(--federal-soft, #e8eef6); border: 1px solid var(--federal, #1b3a6b); border-left: 3px solid #0e7068; border-radius: 4px; color: var(--ink, #14202e); } .ds-pip { display: flex; align-items: center; justify-content: center; height: 2.25rem; width: 2.25rem; border-radius: 9999px; background: #0e7068; color: #fff; font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 0.875rem; } .ds-cand-name { display: flex; align-items: center; gap: 0.375rem; font-weight: 600; } .ds-swatch { height: 0.625rem; width: 0.625rem; border-radius: 2px; background: #0e7068; }"
+    },
+    {
+      "name": "Eyebrow Label",
+      "kind": "custom",
+      "refersTo": "label",
+      "description": "Mono uppercase section eyebrow.",
+      "html": "<span class=\"ds-eyebrow\">Your ranking</span>",
+      "css": ".ds-eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 0.625rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-soft, #51606e); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Approachable Civic Explainer",
+    "overview": "The look of a trustworthy public notice that decided to be warm instead of cold. It borrows the structural calm of official election material but strips out everything intimidating about a government form. Plain-spoken, low-density, encouraging. Color carries meaning, never decoration.",
+    "keyCharacteristics": [
+      "Cool civic paper, not the warm AI cream default",
+      "One federal blue does the structural work; candidate colors are categorical, not partisan",
+      "Plain-language copy that explains jargon in place",
+      "Accessibility (AA, colorblind-aware, keyboard, reduced-motion) is a floor, not a feature"
+    ],
+    "rules": [
+      { "name": "The Neutral-By-Construction Rule", "body": "Candidate colors are categorical, never partisan. Never map a candidate to red-vs-blue opposition or any party signal.", "section": "colors" },
+      { "name": "The Earned Red Rule", "body": "Flag Red appears only on validation errors. If it shows up as an accent or decoration, it's wrong.", "section": "colors" },
+      { "name": "The No-Lift Rule", "body": "No drop shadows on cards or panels. Separation is a border and a background shift, never elevation.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep candidate colors categorical and AA-verified on paper. Pair every color with a label, number, or hatch.",
+      "Do reserve federal blue as the one structural accent and flag red for errors only.",
+      "Do explain jargon in plain language right where it appears.",
+      "Do keep surfaces flat - borders and tonal shifts for separation, never shadows.",
+      "Do honor prefers-reduced-motion on every animation."
+    ],
+    "donts": [
+      "Don't make it look like partisan or campaign material.",
+      "Don't make it look like a bureaucratic government form.",
+      "Don't make it look like a flashy data dashboard.",
+      "Don't make it childish or gamified.",
+      "Don't introduce any color outside the locked palette in globals.css."
+    ]
+  }
+}

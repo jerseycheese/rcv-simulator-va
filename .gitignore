@@ -31,3 +31,6 @@ next-env.d.ts
 # editor
 .vscode/
 .idea/
+
+# impeccable (transient hook state; PRODUCT.md/DESIGN.md and the sidecar are tracked)
+.impeccable/hook.cache.json
