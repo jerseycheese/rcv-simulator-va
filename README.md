@@ -4,7 +4,9 @@ A voter-education simulator for ranked-choice voting. Rank a sample election, se
 
 Built for Virginia, but forks cleanly for any state.
 
-**Status:** Core simulator built — click-to-rank ballot, round-by-round tally, plain-language explanations, candidate renaming, and a plurality-vs-RCV comparison. Next up: a public deploy.
+**Live:** https://jerseycheese.github.io/rcv-simulator-va/
+
+**Status:** Live on GitHub Pages. Core simulator built — click-to-rank ballot, round-by-round tally, plain-language explanations, candidate renaming, and a plurality-vs-RCV comparison. Next up: shareable URL scenarios.
 
 ## Why this exists
 
@@ -26,7 +28,7 @@ Stretch: shareable URL scenarios, custom candidate lists, embed-friendly version
 - TypeScript + Tailwind.
 - [`ranked-voting`](https://www.npmjs.com/package/ranked-voting) ([repo](https://github.com/mikey-t/ranked-voting-ts), MIT) for the IRV tabulation algorithm — no need to reimplement.
 - Local component state, no backend, no auth.
-- Deploys to Vercel free tier or GitHub Pages.
+- Deploys to GitHub Pages via Actions (`.github/workflows/deploy.yml`) on push to `main`.
 
 ## Getting started
 
