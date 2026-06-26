@@ -32,5 +32,6 @@ next-env.d.ts
 .vscode/
 .idea/
 
-# impeccable (transient hook state; PRODUCT.md/DESIGN.md and the sidecar are tracked)
-.impeccable/hook.cache.json
+# impeccable working dir (cache, critique log, live config, regenerable sidecar).
+# The human-readable design context lives in tracked PRODUCT.md / DESIGN.md at root.
+.impeccable/
