@@ -204,7 +204,10 @@ export function Simulator({
           drop them. If you leave someone blank, your ballot will not move to that person. You can
           also rename the candidates to something familiar; the colors stay put.
         </p>
-        <p className="rcv-ranked-status mt-2 font-mono text-[0.625rem] font-semibold uppercase tracking-widest text-ink-soft">
+        <p
+          role="status"
+          className="rcv-ranked-status mt-2 font-mono text-[0.625rem] font-semibold uppercase tracking-widest text-ink-soft"
+        >
           Ranked {rankedCount} of {candidates.length}
         </p>
       </section>
