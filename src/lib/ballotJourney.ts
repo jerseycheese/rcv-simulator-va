@@ -40,17 +40,19 @@ export function describeBallotJourney(
 
     if (!nextChoice) {
       const nextRound = round.round + 1;
+      const skippedChoices = skippedRankedChoices(userBallot, activeChoice, eliminated);
+      const exhaustedStep =
+        skippedChoices.length > 0
+          ? `${skippedChoices.join(' and ')} ${skippedChoices.length === 1 ? 'was' : 'were'} already out, so your ballot had nowhere left to go. This is called an exhausted ballot.`
+          : 'You did not rank anyone else, so your ballot stopped there. This is called an exhausted ballot.';
       return {
         title: `Your ballot stopped in round ${nextRound}`,
-        steps: [
-          ...steps,
-          'You did not rank anyone else, so your ballot stopped there. This is called an exhausted ballot.',
-        ],
+        steps: [...steps, exhaustedStep],
       };
     }
 
     if (nextChoice !== activeChoice) {
-      const skippedChoices = skippedRankedChoices(userBallot, activeChoice, nextChoice, eliminated);
+      const skippedChoices = skippedRankedChoices(userBallot, activeChoice, eliminated, nextChoice);
       if (skippedChoices.length > 0) {
         steps.push(
           `${skippedChoices.join(' and ')} ${skippedChoices.length === 1 ? 'was' : 'were'} already out, so your vote moved to ${nextChoice} in round ${round.round + 1}.`,
@@ -76,14 +78,16 @@ export function describeBallotJourney(
   };
 }
 
+// With no `nextChoice`, looks all the way to the end of the ballot — the
+// exhausted-ballot case, where every remaining ranked choice is already out.
 function skippedRankedChoices(
   userBallot: Ballot,
   previousChoice: string,
-  nextChoice: string,
   eliminated: Set<string>,
+  nextChoice?: string,
 ): string[] {
   const previousIndex = userBallot.indexOf(previousChoice);
-  const nextIndex = userBallot.indexOf(nextChoice);
+  const nextIndex = nextChoice ? userBallot.indexOf(nextChoice) : userBallot.length;
   if (previousIndex < 0 || nextIndex <= previousIndex + 1) return [];
 
   return userBallot
