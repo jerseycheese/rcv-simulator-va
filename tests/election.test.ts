@@ -18,6 +18,21 @@ test('tracks who is eliminated in each round', () => {
   );
 });
 
+test('a candidate stays marked eliminated in every later round, not just the one they go out in', () => {
+  const userBallot = ['Dale Hutchins'];
+  const view = tabulate(sampleElection.candidates, [...sampleElection.ballots, userBallot]);
+
+  const daleEliminated = view.rounds.map(
+    (r) => r.tallies.find((t) => t.name === 'Dale Hutchins')?.eliminated,
+  );
+  assert.deepEqual(daleEliminated, [true, true, true]);
+
+  const carmenEliminated = view.rounds.map(
+    (r) => r.tallies.find((t) => t.name === 'Carmen Ortiz')?.eliminated,
+  );
+  assert.deepEqual(carmenEliminated, [false, true, true]);
+});
+
 test('counts where eliminated ballots go next, including exhausted ones', () => {
   const userBallot = ['Dale Hutchins'];
   const view = tabulate(sampleElection.candidates, [...sampleElection.ballots, userBallot]);

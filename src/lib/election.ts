@@ -161,7 +161,9 @@ export function tabulate(
     const tallies = candidates.map((c) => {
       const counts = stage.rankedVoteCounts[c.name];
       const firstPlace = counts ? counts.voteCounts[0] : 0;
-      return { name: c.name, votes: firstPlace, eliminated: false };
+      // Cumulative: a candidate eliminated in an earlier round stays marked
+      // out in every later round, not just the round they went out in.
+      return { name: c.name, votes: firstPlace, eliminated: eliminatedBeforeRound.has(c.name) };
     });
 
     const totalActive = tallies.reduce((sum, t) => sum + t.votes, 0);
