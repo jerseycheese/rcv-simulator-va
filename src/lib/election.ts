@@ -75,6 +75,19 @@ export type RenamedElection = {
   ballots: Ballot[];
 };
 
+// The `ranked-voting` library keys its internal tallies on a plain object
+// (candidate name -> counts). Assigning to the exact key "__proto__" on a
+// plain object doesn't create a normal property — it swaps the object's own
+// prototype, which corrupts every `for...in` lookup the library does over
+// that object and throws deep inside getFinalResult(). colors.ts and
+// tabulatePlurality already guard against this same name; tabulate() needs
+// the same guard at its own entry point.
+export const RESERVED_CANDIDATE_NAME = '__proto__';
+
+export function isReservedCandidateName(name: string): boolean {
+  return name === RESERVED_CANDIDATE_NAME;
+}
+
 // Presentation-only: candidate names are the ballot identity (ballots are
 // arrays of name strings), so renaming a candidate means rewriting every
 // ballot that references the old name. Keeps the original name as the stable
@@ -131,6 +144,10 @@ export function tabulate(
   candidates: Candidate[],
   ballots: Ballot[],
 ): ElectionView {
+  if (candidates.some((c) => isReservedCandidateName(c.name))) {
+    throw new Error(`Candidate name "${RESERVED_CANDIDATE_NAME}" is reserved and cannot be tabulated.`);
+  }
+
   const controller = new VoteController(
     candidates.map((c) => new VoteOption(c.name)),
   );
