@@ -1,6 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { renameElection, sampleElection, tabulate, tabulatePlurality } from '../src/lib/election.ts';
+import {
+  isReservedCandidateName,
+  renameElection,
+  sampleElection,
+  tabulate,
+  tabulatePlurality,
+} from '../src/lib/election.ts';
 
 test('tracks who is eliminated in each round', () => {
   const userBallot = ['Dale Hutchins'];
@@ -91,6 +97,29 @@ test('plurality reports a tie when candidates share the lead', () => {
 
   assert.equal(result.winner, null);
   assert.deepEqual(result.tieOptions, ['A', 'B']);
+});
+
+test('a candidate renamed to "__proto__" is rejected instead of crashing tabulate', () => {
+  // The `ranked-voting` library keys its internal tallies on a plain object,
+  // and assigning to the exact key "__proto__" swaps the object's own
+  // prototype instead of creating a normal property — that corrupts the
+  // library's internal for...in loops and throws a cryptic TypeError deep
+  // inside getFinalResult(). tabulate() should refuse this input up front
+  // with a clear error instead.
+  const renameMap = { 'Aisha Patel': '__proto__' };
+  const { candidates, ballots } = renameElection(
+    sampleElection.candidates,
+    sampleElection.ballots,
+    renameMap,
+  );
+
+  assert.throws(() => tabulate(candidates, ballots), /reserved/);
+});
+
+test('isReservedCandidateName only flags the exact "__proto__" string', () => {
+  assert.equal(isReservedCandidateName('__proto__'), true);
+  assert.equal(isReservedCandidateName('constructor'), false);
+  assert.equal(isReservedCandidateName('Aisha Patel'), false);
 });
 
 test('plurality has no winner when every ballot is blank', () => {

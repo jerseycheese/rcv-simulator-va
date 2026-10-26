@@ -1,7 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { renameElection, tabulate, tabulatePlurality, type Ballot, type Candidate } from '@/lib/election';
+import {
+  isReservedCandidateName,
+  renameElection,
+  tabulate,
+  tabulatePlurality,
+  type Ballot,
+  type Candidate,
+} from '@/lib/election';
 import { describeBallotJourney } from '@/lib/ballotJourney';
 import { buildColorMap, type ColorMap } from '@/lib/colors';
 import { traceUserBallot } from '@/lib/ballotTrace';
@@ -67,7 +74,8 @@ export function Simulator({
   const duplicateNames = new Set(
     effectiveList.filter((name, i) => effectiveList.indexOf(name) !== i),
   );
-  const canSubmit = rankedCount > 0 && duplicateNames.size === 0;
+  const reservedNames = new Set(effectiveList.filter(isReservedCandidateName));
+  const canSubmit = rankedCount > 0 && duplicateNames.size === 0 && reservedNames.size === 0;
 
   const userBallot: Ballot = candidates
     .filter((c) => typeof ranks[c.name] === 'number')
@@ -218,6 +226,7 @@ export function Simulator({
           const isRanked = typeof rank === 'number';
           const color = colorMap[c.name];
           const isDuplicate = duplicateNames.has(effectiveName[c.name]);
+          const isReserved = reservedNames.has(effectiveName[c.name]);
           // A ranked candidate can move to any taken position (1..rankedCount);
           // an unranked one can also take the next open slot (rankedCount + 1).
           const maxRank = Math.min(candidates.length, isRanked ? rankedCount : rankedCount + 1);
@@ -307,12 +316,15 @@ export function Simulator({
                       }}
                       aria-label={`Rename ${c.name}`}
                       className={`rcv-rename-input mt-1 w-full rounded-sm border bg-surface px-2.5 py-1.5 text-sm font-normal normal-case tracking-normal text-ink outline-none transition focus:border-federal ${
-                        isDuplicate ? 'border-flag-red' : 'border-rule'
+                        isDuplicate || isReserved ? 'border-flag-red' : 'border-rule'
                       }`}
                     />
                   </label>
                   {isDuplicate && (
                     <p className="mt-1.5 text-xs text-flag-red">Names must be unique.</p>
+                  )}
+                  {isReserved && (
+                    <p className="mt-1.5 text-xs text-flag-red">That name isn&apos;t allowed.</p>
                   )}
                 </div>
               </div>
