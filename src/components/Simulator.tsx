@@ -261,7 +261,7 @@ export function Simulator({
                     id={`rcv-rank-${i}`}
                     value={isRanked ? String(rank) : ''}
                     onChange={(e) => changeRank(c.name, e.currentTarget.value)}
-                    className="rcv-rank-select h-9 w-14 shrink-0 appearance-none rounded-sm border bg-no-repeat pl-3 text-left font-mono text-sm font-bold transition"
+                    className="rcv-rank-select h-11 w-14 sm:h-9 shrink-0 appearance-none rounded-sm border bg-no-repeat pl-3 text-left font-mono text-sm font-bold transition"
                     style={
                       isRanked
                         ? {
