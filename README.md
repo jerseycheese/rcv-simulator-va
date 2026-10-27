@@ -6,7 +6,7 @@ Built for Virginia, but forks cleanly for any state.
 
 **Live:** https://jerseycheese.github.io/rcv-simulator-va/
 
-**Status:** Live on GitHub Pages. Core simulator built — click-to-rank ballot, round-by-round tally, plain-language explanations, candidate renaming, and a plurality-vs-RCV comparison. Next up: shareable URL scenarios.
+**Status:** Live on GitHub Pages. Core simulator built — click-to-rank ballot, round-by-round tally, plain-language explanations, candidate renaming, a plurality-vs-RCV comparison, and shareable links (`?r=Aisha Patel,Carmen Ortiz` pre-ranks the ballot). Next up: custom candidate lists.
 
 ## Why this exists
 
@@ -20,7 +20,7 @@ After surveying the open-source RCV landscape (FairVote, NYC Civic Engagement Co
 - Plain-language explanation per round ("Candidate X had the fewest first-choice votes, so their ballots get redistributed to each voter's second choice.").
 - Mobile-responsive, static-deployed.
 
-Stretch: shareable URL scenarios, custom candidate lists, embed-friendly version any org can drop into their site.
+Stretch: custom candidate lists, embed-friendly version any org can drop into their site.
 
 ## Stack
 

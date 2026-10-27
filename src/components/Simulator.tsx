@@ -13,6 +13,7 @@ import { describeBallotJourney } from '@/lib/ballotJourney';
 import { buildColorMap, type ColorMap } from '@/lib/colors';
 import { traceUserBallot } from '@/lib/ballotTrace';
 import { parseSavedBallot, SAVED_BALLOT_KEY, serializeBallot } from '@/lib/savedBallot';
+import { parseRankParam, withRankParam } from '@/lib/shareUrl';
 import { RoundCard } from './RoundCard';
 import { MethodComparison } from './MethodComparison';
 
@@ -73,9 +74,15 @@ export function Simulator({
     } catch {
       // Storage blocked (private mode, disabled cookies): start blank.
     }
-    const saved = parseSavedBallot(raw, candidates.map((c) => c.name));
+    const candidateNames = candidates.map((c) => c.name);
+    const saved = parseSavedBallot(raw, candidateNames);
+    // A shared link's ranking wins over the saved one; saved renames still apply.
+    const shared = parseRankParam(window.location.search, candidateNames);
+    const order = shared.length > 0 ? shared : saved?.order;
+    if (order) {
+      setRanks(Object.fromEntries(order.map((name, i) => [name, i + 1])));
+    }
     if (saved) {
-      setRanks(Object.fromEntries(saved.order.map((name, i) => [name, i + 1])));
       setNames((prev) => ({ ...prev, ...saved.names }));
     }
     setHasRestored(true);
@@ -131,9 +138,21 @@ export function Simulator({
     setRanks((prev) => setRank(prev, name, value === '' ? null : Number(value)));
   }
 
+  // replaceState, not a navigation: the URL tracks the submitted ballot so it
+  // can be shared, without adding history entries or reloading the page.
+  function setShareUrl(order: string[]) {
+    window.history.replaceState(null, '', withRankParam(window.location.href, order));
+  }
+
+  function submit() {
+    setShareUrl(rankedOrder(ranks));
+    setSubmitted(true);
+  }
+
   function reset() {
     setRanks({});
     setSubmitted(false);
+    setShareUrl([]);
   }
 
   if (submitted) {
@@ -372,7 +391,7 @@ export function Simulator({
         <button
           type="button"
           disabled={!canSubmit}
-          onClick={() => setSubmitted(true)}
+          onClick={submit}
           className="rcv-submit rounded-sm bg-federal px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-ink disabled:cursor-not-allowed disabled:bg-eliminated"
         >
           See what happens with my ballot
