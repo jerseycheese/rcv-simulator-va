@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   isReservedCandidateName,
   renameElection,
@@ -12,6 +12,7 @@ import {
 import { describeBallotJourney } from '@/lib/ballotJourney';
 import { buildColorMap, type ColorMap } from '@/lib/colors';
 import { traceUserBallot } from '@/lib/ballotTrace';
+import { parseSavedBallot, SAVED_BALLOT_KEY, serializeBallot } from '@/lib/savedBallot';
 import { RoundCard } from './RoundCard';
 import { MethodComparison } from './MethodComparison';
 
@@ -60,6 +61,40 @@ export function Simulator({
   const [ranks, setRanks] = useState<Ranks>({});
   const [names, setNames] = useState<CandidateNames>(() => defaultNames(candidates));
   const [submitted, setSubmitted] = useState(false);
+  const [hasRestored, setHasRestored] = useState(false);
+
+  // Restore after mount, not in the useState initializer: the static export
+  // renders an empty ballot at build time, so reading storage during the first
+  // render would mismatch the server HTML.
+  useEffect(() => {
+    let raw: string | null = null;
+    try {
+      raw = window.localStorage.getItem(SAVED_BALLOT_KEY);
+    } catch {
+      // Storage blocked (private mode, disabled cookies): start blank.
+    }
+    const saved = parseSavedBallot(raw, candidates.map((c) => c.name));
+    if (saved) {
+      setRanks(Object.fromEntries(saved.order.map((name, i) => [name, i + 1])));
+      setNames((prev) => ({ ...prev, ...saved.names }));
+    }
+    setHasRestored(true);
+  }, [candidates]);
+
+  useEffect(() => {
+    if (!hasRestored) return;
+    const order = rankedOrder(ranks);
+    const isRenamed = candidates.some((c) => names[c.name] !== c.name);
+    try {
+      if (order.length === 0 && !isRenamed) {
+        window.localStorage.removeItem(SAVED_BALLOT_KEY);
+      } else {
+        window.localStorage.setItem(SAVED_BALLOT_KEY, serializeBallot({ order, names }));
+      }
+    } catch {
+      // Storage full or blocked: the ballot still works, it just won't survive a refresh.
+    }
+  }, [hasRestored, ranks, names, candidates]);
 
   // Colors are keyed by the original (stable) name so a candidate keeps the
   // same hue no matter what it's renamed to.
