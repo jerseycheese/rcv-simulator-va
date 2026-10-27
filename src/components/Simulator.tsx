@@ -261,7 +261,7 @@ export function Simulator({
                     id={`rcv-rank-${i}`}
                     value={isRanked ? String(rank) : ''}
                     onChange={(e) => changeRank(c.name, e.currentTarget.value)}
-                    className="rcv-rank-select h-9 w-14 shrink-0 appearance-none rounded-sm border bg-no-repeat pl-3 text-left font-mono text-sm font-bold outline-none transition focus:border-federal"
+                    className="rcv-rank-select h-9 w-14 shrink-0 appearance-none rounded-sm border bg-no-repeat pl-3 text-left font-mono text-sm font-bold transition"
                     style={
                       isRanked
                         ? {
@@ -315,7 +315,7 @@ export function Simulator({
                         setNames((prev) => ({ ...prev, [c.name]: value }));
                       }}
                       aria-label={`Rename ${c.name}`}
-                      className={`rcv-rename-input mt-1 w-full rounded-sm border bg-surface px-2.5 py-1.5 text-sm font-normal normal-case tracking-normal text-ink outline-none transition focus:border-federal ${
+                      className={`rcv-rename-input mt-1 w-full rounded-sm border bg-surface px-2.5 py-1.5 text-sm font-normal normal-case tracking-normal text-ink transition focus:border-federal ${
                         isDuplicate || isReserved ? 'border-flag-red' : 'border-rule'
                       }`}
                     />
