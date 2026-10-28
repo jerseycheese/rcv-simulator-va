@@ -40,6 +40,8 @@ test("reports a listener this checkout didn't start and signals nobody", { skip:
     const result = spawnSync("bash", [script, String(server.port)], { encoding: "utf8" });
     assert.equal(result.status, 1);
     assert.match(result.stderr, /didn't start/);
+    // spawnSync blocks the event loop, so a child it killed isn't reaped until we yield.
+    await new Promise((resolve) => setTimeout(resolve, 200));
     assert.ok(isAlive(server.proc), "foreign listener must survive");
     assert.ok(isAlive(client), "client must survive");
   } finally {
