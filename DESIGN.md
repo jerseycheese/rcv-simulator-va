@@ -160,7 +160,7 @@ A native number menu (`<select>`, `rcv-rank-select`) styled as a pip with a smal
 ### Inputs (Rename field)
 - **Style:** White surface, rule border, 4px radius, normal-case (overrides the mono label's uppercase).
 - **Focus:** Border shifts to federal.
-- **Error:** Border shifts to flag-red with a "Names must be unique." message below.
+- **Error:** Border shifts to flag-red with a flag-red message below: "Names must be unique." for a duplicate, "That name isn't allowed." for a reserved name.
 
 ### Legend
 - A horizontal, rule-bounded strip mapping each candidate swatch to its name. Always present so color is never the only key.
