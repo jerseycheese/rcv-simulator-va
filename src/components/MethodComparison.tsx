@@ -82,7 +82,7 @@ export function MethodComparison({
 
         <div className="rcv-method-rcv rounded-sm border border-rule bg-surface p-5">
           <p className="font-mono text-[0.625rem] font-semibold uppercase tracking-widest text-ink-soft">
-            Ranked-choice · every ranking counts
+            Ranked-choice · rounds until a majority
           </p>
           {rcvWinner ? (
             <div className="rcv-method-rcv-winner mt-3 flex items-center gap-3">
@@ -122,9 +122,8 @@ export function MethodComparison({
         {disagree ? (
           <>
             <span className="font-semibold">Different winners, identical ballots.</span>{' '}
-            {pluralityWinner} has the most first-choice votes, but once every voter&apos;s full
-            ranking is counted, a majority backs {rcvWinner}. That gap is the case for ranked-choice
-            voting.
+            {pluralityWinner} has the most first-choice votes, but once rankings are counted,{' '}
+            {rcvWinner} has a majority of the ballots still in the count.
           </>
         ) : agree ? (
           <>
