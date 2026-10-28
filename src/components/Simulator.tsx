@@ -244,6 +244,7 @@ export function Simulator({
                 key={round.round}
                 round={round}
                 isFinalRound={idx === view.rounds.length - 1}
+                winner={view.winner}
                 colorMap={resultColors}
                 maxScale={maxScale}
                 youSupport={trace[idx]}
