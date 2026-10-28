@@ -10,7 +10,7 @@ export function describeFinalRound(winner: string | null): string {
   return 'No one crossed the majority line, and the candidates left are tied. The count ends in a tie.';
 }
 
-function formatNames(names: string[]): string {
+export function formatNames(names: string[]): string {
   if (names.length <= 2) return names.join(' and ');
   return `${names.slice(0, -1).join(', ')}, and ${names[names.length - 1]}`;
 }

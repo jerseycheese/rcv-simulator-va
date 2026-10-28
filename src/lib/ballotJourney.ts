@@ -1,4 +1,5 @@
-import type { Ballot, RoundView } from './election';
+import { currentChoice, type Ballot, type RoundView } from './election.ts';
+import { formatNames } from './roundExplanation.ts';
 
 export type BallotJourney = {
   title: string;
@@ -33,14 +34,14 @@ export function describeBallotJourney(
       eliminated.add(candidate);
     }
 
-    const nextChoice = userBallot.find((name) => !eliminated.has(name));
+    const nextChoice = currentChoice(userBallot, eliminated);
 
     if (!nextChoice) {
       const nextRound = round.round + 1;
       const skippedChoices = skippedRankedChoices(userBallot, activeChoice, eliminated);
       const exhaustedStep =
         skippedChoices.length > 0
-          ? `${skippedChoices.join(' and ')} ${skippedChoices.length === 1 ? 'was' : 'were'} already out, so your ballot had nowhere left to go. This is called an exhausted ballot.`
+          ? `${formatNames(skippedChoices)} ${skippedChoices.length === 1 ? 'was' : 'were'} already out, so your ballot had nowhere left to go. This is called an exhausted ballot.`
           : 'You did not rank anyone else, so your ballot stopped there. This is called an exhausted ballot.';
       return {
         title: `Your ballot stopped in round ${nextRound}`,
@@ -52,7 +53,7 @@ export function describeBallotJourney(
       const skippedChoices = skippedRankedChoices(userBallot, activeChoice, eliminated, nextChoice);
       if (skippedChoices.length > 0) {
         steps.push(
-          `${skippedChoices.join(' and ')} ${skippedChoices.length === 1 ? 'was' : 'were'} already out, so your vote moved to ${nextChoice} in round ${round.round + 1}.`,
+          `${formatNames(skippedChoices)} ${skippedChoices.length === 1 ? 'was' : 'were'} already out, so your vote moved to ${nextChoice} in round ${round.round + 1}.`,
         );
       } else {
         steps.push(`Your vote moved to ${nextChoice} in round ${round.round + 1}.`);
