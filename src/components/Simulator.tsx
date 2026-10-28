@@ -12,8 +12,8 @@ import {
 import { describeBallotJourney } from '@/lib/ballotJourney';
 import { buildColorMap, type ColorMap } from '@/lib/colors';
 import { traceUserBallot } from '@/lib/ballotTrace';
-import { parseSavedBallot, SAVED_BALLOT_KEY, serializeBallot } from '@/lib/savedBallot';
-import { consumeRankParam, withRankParam } from '@/lib/shareUrl';
+import { ballotToSave, restoreBallot, SAVED_BALLOT_KEY, serializeBallot } from '@/lib/savedBallot';
+import { withRankParam } from '@/lib/shareUrl';
 import { RoundCard } from './RoundCard';
 import { MethodComparison } from './MethodComparison';
 import { Swatch } from './Swatch';
@@ -75,32 +75,29 @@ export function Simulator({
     } catch {
       // Storage blocked (private mode, disabled cookies): start blank.
     }
-    const candidateNames = candidates.map((c) => c.name);
-    const saved = parseSavedBallot(raw, candidateNames);
-    // A shared link's ranking wins over the saved one; saved renames still apply.
-    // The param is dropped once applied so later edits survive a refresh;
-    // submit() puts it back for sharing.
-    const shared = consumeRankParam(window.location.href, candidateNames);
-    if (shared.cleanHref) window.history.replaceState(null, '', shared.cleanHref);
-    const order = shared.order.length > 0 ? shared.order : saved?.order;
-    if (order) {
-      setRanks(Object.fromEntries(order.map((name, i) => [name, i + 1])));
-    }
-    if (saved) {
-      setNames((prev) => ({ ...prev, ...saved.names }));
-    }
+    // submit() puts the link's param back for sharing.
+    const restored = restoreBallot(
+      raw,
+      window.location.href,
+      candidates.map((c) => c.name),
+    );
+    if (restored.cleanHref) window.history.replaceState(null, '', restored.cleanHref);
+    setRanks(Object.fromEntries(restored.order.map((name, i) => [name, i + 1])));
+    setNames((prev) => ({ ...prev, ...restored.names }));
     setHasRestored(true);
   }, [candidates]);
 
   useEffect(() => {
     if (!hasRestored) return;
-    const order = rankedOrder(ranks);
-    const isRenamed = candidates.some((c) => names[c.name] !== c.name);
+    const ballot = ballotToSave(
+      { order: rankedOrder(ranks), names },
+      candidates.map((c) => c.name),
+    );
     try {
-      if (order.length === 0 && !isRenamed) {
-        window.localStorage.removeItem(SAVED_BALLOT_KEY);
+      if (ballot) {
+        window.localStorage.setItem(SAVED_BALLOT_KEY, serializeBallot(ballot));
       } else {
-        window.localStorage.setItem(SAVED_BALLOT_KEY, serializeBallot({ order, names }));
+        window.localStorage.removeItem(SAVED_BALLOT_KEY);
       }
     } catch {
       // Storage full or blocked: the ballot still works, it just won't survive a refresh.

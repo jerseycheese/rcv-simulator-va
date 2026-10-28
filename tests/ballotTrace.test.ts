@@ -10,8 +10,7 @@ test('tracks which candidate the ballot counts for, round by round', () => {
   const trace = traceUserBallot(userBallot, view.rounds);
 
   // Round 1: still with first choice. After Dale and Carmen fall, it lands on Aisha.
-  assert.equal(trace[0], 'Dale Hutchins');
-  assert.equal(trace[trace.length - 1], 'Aisha Patel');
+  assert.deepEqual(trace, ['Dale Hutchins', 'Carmen Ortiz', 'Aisha Patel']);
 });
 
 test('returns null once the ballot exhausts', () => {
