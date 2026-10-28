@@ -95,8 +95,10 @@ export function MethodComparison({
               >
                 ✓
               </span>
-              <div>
-                <p className="font-display text-xl font-bold tracking-tight text-ink">{rcvWinner}</p>
+              <div className="min-w-0">
+                <p className="break-words font-display text-xl font-bold tracking-tight text-ink">
+                  {rcvWinner}
+                </p>
                 <p className="text-sm text-ink-soft">
                   Majority after {rcv.rounds.length} round{rcv.rounds.length === 1 ? '' : 's'}.
                 </p>

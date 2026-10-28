@@ -283,6 +283,11 @@ export function Simulator({
           const color = colorMap[c.name];
           const isDuplicate = duplicateNames.has(effectiveName[c.name]);
           const isReserved = reservedNames.has(effectiveName[c.name]);
+          const renameError = isReserved
+            ? "That name isn't allowed."
+            : isDuplicate
+              ? 'Names must be unique.'
+              : null;
           // A ranked candidate can move to any taken position (1..rankedCount);
           // an unranked one can also take the next open slot (rankedCount + 1).
           const maxRank = Math.min(candidates.length, isRanked ? rankedCount : rankedCount + 1);
@@ -371,16 +376,17 @@ export function Simulator({
                         setNames((prev) => ({ ...prev, [c.name]: value }));
                       }}
                       aria-label={`Rename ${c.name}`}
+                      aria-invalid={Boolean(renameError)}
+                      aria-describedby={renameError ? `rcv-rename-error-${i}` : undefined}
                       className={`rcv-rename-input mt-1 w-full rounded-sm border bg-surface px-2.5 py-1.5 text-sm font-normal normal-case tracking-normal text-ink transition focus:border-federal ${
-                        isDuplicate || isReserved ? 'border-flag-red' : 'border-rule'
+                        renameError ? 'border-flag-red' : 'border-rule'
                       }`}
                     />
                   </label>
-                  {isDuplicate && (
-                    <p className="mt-1.5 text-xs text-flag-red">Names must be unique.</p>
-                  )}
-                  {isReserved && (
-                    <p className="mt-1.5 text-xs text-flag-red">That name isn&apos;t allowed.</p>
+                  {renameError && (
+                    <p id={`rcv-rename-error-${i}`} className="mt-1.5 text-xs text-flag-red">
+                      {renameError}
+                    </p>
                   )}
                 </div>
               </div>
@@ -402,7 +408,7 @@ export function Simulator({
           <button
             type="button"
             onClick={reset}
-            className="rcv-clear font-mono text-xs font-semibold uppercase tracking-wide text-ink-soft hover:underline"
+            className="rcv-clear min-h-11 sm:min-h-0 font-mono text-xs font-semibold uppercase tracking-wide text-ink-soft hover:underline"
           >
             Clear
           </button>
@@ -410,7 +416,7 @@ export function Simulator({
         <button
           type="button"
           onClick={() => setNames(defaultNames(candidates))}
-          className="rcv-reset-names font-mono text-xs font-semibold uppercase tracking-wide text-ink-soft hover:underline sm:ml-auto"
+          className="rcv-reset-names min-h-11 sm:min-h-0 font-mono text-xs font-semibold uppercase tracking-wide text-ink-soft hover:underline sm:ml-auto"
         >
           Reset names
         </button>

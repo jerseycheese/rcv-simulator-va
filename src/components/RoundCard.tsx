@@ -145,14 +145,14 @@ export function RoundCard({
                     style={{ ['--i' as string]: i }}
                   >
                     <Swatch color={colorMap[transfer.from]} />
-                    <span className="text-ink-soft line-through">{transfer.from}</span>
+                    <span className="min-w-0 break-words text-ink-soft line-through">{transfer.from}</span>
                     <span className="text-ink-soft" aria-hidden="true">
                       →
                     </span>
                     {transfer.to ? (
                       <>
                         <Swatch color={colorMap[transfer.to]} />
-                        <span className="font-medium text-ink">{transfer.to}</span>
+                        <span className="min-w-0 break-words font-medium text-ink">{transfer.to}</span>
                       </>
                     ) : (
                       <>
@@ -160,7 +160,7 @@ export function RoundCard({
                         <span className="italic text-ink-soft">exhausted</span>
                       </>
                     )}
-                    <span className="ml-auto font-mono text-xs font-semibold tabular-nums text-ink">
+                    <span className="ml-auto shrink-0 font-mono text-xs font-semibold tabular-nums text-ink">
                       +{transfer.votes}
                     </span>
                   </li>
