@@ -6,7 +6,7 @@ Built for Virginia, but forks cleanly for any state.
 
 **Live:** https://jerseycheese.github.io/rcv-simulator-va/
 
-**Status:** Live on GitHub Pages. Core simulator built — click-to-rank ballot, round-by-round tally, plain-language explanations, candidate renaming, a plurality-vs-RCV comparison, and shareable links (`?r=Aisha Patel,Carmen Ortiz` pre-ranks the ballot). Next up: custom candidate lists.
+**Status:** Live on GitHub Pages. Core simulator built — a ballot ranked with per-candidate number menus, round-by-round tally, plain-language explanations, candidate renaming, a plurality-vs-RCV comparison, and shareable links (`?r=Aisha Patel,Carmen Ortiz` pre-ranks the ballot). Next up: custom candidate lists.
 
 ## Why this exists
 

@@ -94,7 +94,7 @@ A restrained civic palette: a cool near-white ground, one institutional blue, an
 - **Federal Wash** (#e8eef6): A pale tint of the federal blue used to fill a selected candidate card, signaling "chosen" without shouting.
 
 ### Secondary
-- **Flag Red** (#9e2b2b): Reserved strictly for validation errors (duplicate names). Never decorative, never an accent — its rarity is what makes it read as "stop."
+- **Flag Red** (#9e2b2b): Rare on purpose — its rarity is what makes it read as "stop." Four jobs only: rename validation errors (duplicate or reserved names), the majority threshold line and its label on each round card (the bar to clear), the "different winners" takeaway border in the method comparison, and the short red segment of the header rule, which pairs with the federal blue as the one flag-color nod.
 
 ### Tertiary — Candidate Categorical Set
 Six hues, each AA on paper, ordered for maximum perceptual separation including for common color-vision deficiencies:
@@ -111,7 +111,7 @@ Six hues, each AA on paper, ordered for maximum perceptual separation including 
 ### Named Rules
 **The Neutral-By-Construction Rule.** Candidate colors are categorical, never partisan. Never map a candidate to red-vs-blue opposition or any party signal. The set exists to tell four people apart, not to take a side.
 
-**The Earned Red Rule.** Flag Red (#9e2b2b) appears only on validation errors. If it shows up as an accent or decoration, it's wrong.
+**The Earned Red Rule.** Flag Red (#9e2b2b) appears only in the four places listed above: rename errors, the majority threshold, the different-winners takeaway, and the header rule. Anywhere else, as an accent or decoration, it's wrong. Adding a fifth use means updating this rule first.
 
 ## 3. Typography
 
@@ -143,16 +143,17 @@ Flat by construction. The system conveys depth through tonal layering and 1px ru
 - **Shape:** Slightly rounded (4px, `rounded-sm`).
 - **Primary:** Federal blue fill, white text, 0.625rem×1.25rem padding ("See what happens with my ballot").
 - **Hover / Focus:** Darkens to ink (#14202e) on hover; 2px federal focus-visible ring with 2px offset.
-- **Disabled:** Eliminated gray (#9aa6b2), not-allowed cursor — appears until at least one candidate is ranked.
+- **Disabled:** Eliminated gray (#9aa6b2), not-allowed cursor — appears until at least one candidate is ranked, and while any name is a duplicate or reserved.
 - **Tertiary / text actions:** Mono uppercase, ink-soft, underline-on-hover ("Clear", "Reset names", "Vote again").
 
 ### Candidate Card (signature component)
 - **Corner Style:** 4px.
 - **Default:** White surface, rule border.
 - **Selected:** Federal-wash fill, federal border, plus a 3px left edge in the candidate's own hue and a filled rank pip. The hue-coded left edge is a deliberate exception to the usual side-stripe ban: here it encodes which candidate, it isn't decoration.
-- **Internal Padding:** 1rem; a divided rename sub-region below the choice button.
+- **Internal Padding:** 1rem; a divided rename sub-region below the rank row (rank menu plus the candidate's name and blurb; tapping an unranked candidate's name adds them next).
 
 ### Rank Pip
+A native number menu (`<select>`, `rcv-rank-select`) styled as a pip with a small caret. Picking a number sets or moves that candidate's place; picking the en-dash unranks them.
 - **Unranked:** Dashed rule border, en-dash, ink-soft — reads as an empty slot.
 - **Ranked:** Solid fill in the candidate's hue, white number — the ballot's running order made visual.
 
@@ -168,7 +169,7 @@ Flat by construction. The system conveys depth through tonal layering and 1px ru
 
 ### Do:
 - **Do** keep candidate colors categorical and AA-verified on paper (#f3f5f8). Pair every color with a label, number, or hatch.
-- **Do** reserve federal blue (#1b3a6b) as the one structural accent and flag red (#9e2b2b) for errors only.
+- **Do** reserve federal blue (#1b3a6b) as the one structural accent and flag red (#9e2b2b) for the four uses the Earned Red Rule names.
 - **Do** explain jargon ("exhausted ballot") in plain language right where it appears.
 - **Do** keep surfaces flat — borders and tonal shifts for separation, never shadows.
 - **Do** honor `prefers-reduced-motion`: every entrance, bar-grow, and threshold-draw animation must collapse to no-motion.
