@@ -35,9 +35,15 @@ src/components/   Simulator.tsx (ballot + state), RoundCard.tsx (round tallies),
                   MethodComparison.tsx (plurality vs RCV side by side)
 src/lib/          election.ts (ballot types + tabulation via the ranked-voting lib),
                   ballotJourney.ts / ballotTrace.ts (plain-language ballot explanations),
-                  colors.ts (stable candidate colors), roundExplanation.ts
+                  colors.ts (stable candidate colors), roundExplanation.ts,
+                  savedBallot.ts (in-progress ballot in localStorage),
+                  shareUrl.ts (ranking in the `?r=` query string)
 tests/            *.test.ts per lib module
 scripts/          dev.sh, worktree-port.cjs, kill-port.sh (port management)
+.github/workflows/ ci.yml (checks + build on every push and PR),
+                  deploy.yml (publishes to GitHub Pages on every push to main)
+PRODUCT.md        users, purpose, and the non-partisan and plain-language constraints
+DESIGN.md         palette tokens, typography, and the accessibility floor
 ```
 
 ## Hard rules
@@ -58,9 +64,8 @@ scripts/          dev.sh, worktree-port.cjs, kill-port.sh (port management)
 
 - Port already in use → dev.sh frees its own computed port via kill-port.sh; if something else squats on it, `lsof -iTCP:<port>` and deal with that process.
 - Hydration warnings → some were deliberately suppressed; check git history before "fixing" them.
-- `.claude/launch.json` hardcodes port 3000 — only correct for the main checkout.
 
 ## Pointers
 
-- README.md — MVP scope, stack, deploy status (static export; deployment is the next milestone).
+- README.md — MVP scope, stack, and status. Live on GitHub Pages at https://jerseycheese.github.io/rcv-simulator-va/, deployed by `deploy.yml`.
 - scripts/worktree-port.cjs — the port derivation, commented.
