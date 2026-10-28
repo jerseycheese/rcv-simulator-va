@@ -215,7 +215,6 @@ export function Simulator({
           plurality={plurality}
           rcv={view}
           colorMap={resultColors}
-          totalVoters={view.totalVoters}
         />
 
         <details className="rcv-rounds-disclosure mt-2 [&[open]_.rcv-rounds-caret]:rotate-180">
@@ -423,8 +422,8 @@ function Legend({ items }: { items: { name: string; color: string }[] }) {
       <span className="font-mono text-[0.625rem] uppercase tracking-widest text-ink-soft">
         Candidates
       </span>
-      {items.map((item) => (
-        <span key={item.name} className="flex items-center gap-1.5 text-xs font-medium text-ink">
+      {items.map((item, i) => (
+        <span key={i} className="flex items-center gap-1.5 text-xs font-medium text-ink">
           <span
             className="h-2.5 w-2.5 rounded-[2px]"
             style={{ backgroundColor: item.color }}

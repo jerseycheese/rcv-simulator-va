@@ -24,15 +24,12 @@ export function describeBallotJourney(
   let activeRound = 1;
 
   for (const round of rounds) {
-    const eliminatedThisRound = round.tallies
-      .filter((tally) => tally.eliminated)
-      .map((tally) => tally.name);
 
-    if (eliminatedThisRound.includes(activeChoice)) {
+    if (round.eliminatedThisRound.includes(activeChoice)) {
       steps.push(`${activeChoice} was out after round ${round.round}.`);
     }
 
-    for (const candidate of eliminatedThisRound) {
+    for (const candidate of round.eliminatedThisRound) {
       eliminated.add(candidate);
     }
 
