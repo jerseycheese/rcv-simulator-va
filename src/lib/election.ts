@@ -172,9 +172,14 @@ export function tabulate(
     const eliminatedThisRound: string[] = [];
     const next = result.stageResults[idx + 1];
     if (next) {
+      // The library strips eliminated candidates from every ballot, so a
+      // candidate still in the race keeps some count at some rank. Checking
+      // every rank (not just first choices) catches a candidate nobody ranked
+      // first, whom the library drops in round 1.
+      const rankedAnywhere = (s: typeof stage, name: string) =>
+        (s.rankedVoteCounts[name]?.voteCounts ?? []).some((n) => n > 0);
       for (const t of tallies) {
-        const nextCount = next.rankedVoteCounts[t.name]?.voteCounts[0] ?? 0;
-        if (t.votes > 0 && nextCount === 0) {
+        if (rankedAnywhere(stage, t.name) && !rankedAnywhere(next, t.name)) {
           t.eliminated = true;
           eliminatedThisRound.push(t.name);
         }

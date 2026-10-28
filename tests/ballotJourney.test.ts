@@ -72,3 +72,15 @@ test('names a skipped already-eliminated choice when a ballot moves past it to a
     'Aisha Patel won.',
   ]);
 });
+
+test('skips a zero-first-choice candidate the library already dropped', () => {
+  const candidates = ['A', 'B', 'C', 'Z'].map((name) => ({ name, blurb: '' }));
+  const userBallot = ['C', 'Z', 'B'];
+  const ballots = [['A'], ['A'], ['A'], ['A'], ['B'], ['B'], ['B'], ['C', 'Z', 'B'], userBallot];
+  const view = tabulate(candidates, ballots);
+
+  const journey = describeBallotJourney(userBallot, view.rounds, view.winner);
+
+  assert.ok(!journey.steps.some((step) => step.includes('moved to Z')), journey.steps.join(' | '));
+  assert.ok(journey.steps.some((step) => step.includes('moved to B')), journey.steps.join(' | '));
+});
