@@ -160,3 +160,14 @@ test('a candidate nobody ranks first is shown eliminated in round 1, and transfe
   );
   assert.deepEqual(view.rounds[1].transfers, [{ from: 'C', to: 'B', votes: 2 }]);
 });
+
+test('a candidate nobody ranks is marked out from round 1', () => {
+  const candidates = [...sampleElection.candidates, { name: 'Zed', blurb: '' }];
+  const view = tabulate(candidates, sampleElection.ballots);
+
+  assert.ok(view.rounds[0].eliminatedThisRound.includes('Zed'));
+  assert.deepEqual(
+    view.rounds.map((r) => r.tallies.find((t) => t.name === 'Zed')?.eliminated),
+    view.rounds.map(() => true),
+  );
+});

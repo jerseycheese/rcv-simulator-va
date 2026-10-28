@@ -8,12 +8,10 @@ export function MethodComparison({
   plurality,
   rcv,
   colorMap,
-  totalVoters,
 }: {
   plurality: PluralityView;
   rcv: ElectionView;
   colorMap: ColorMap;
-  totalVoters: number;
 }) {
   const pluralityWinner = plurality.winner;
   const rcvWinner = rcv.winner;
@@ -111,7 +109,7 @@ export function MethodComparison({
           )}
           <p className="rcv-method-rcv-note mt-4 border-t border-rule pt-3 text-sm text-ink-soft">
             Trailing candidates drop out and their ballots move to each voter&apos;s next choice,
-            until someone clears a majority of {totalVoters} ballots — yours included.
+            until someone clears a majority of the ballots still in the count — yours included.
           </p>
         </div>
       </div>
