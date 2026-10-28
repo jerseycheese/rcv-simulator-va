@@ -148,3 +148,15 @@ test('plurality has no winner when every ballot is blank', () => {
   assert.equal(result.tieOptions, null);
   assert.equal(result.totalVotes, 0);
 });
+
+test('a candidate nobody ranks first is shown eliminated in round 1, and transfers skip them', () => {
+  const candidates = ['A', 'B', 'C', 'Z'].map((name) => ({ name, blurb: '' }));
+  const ballots = [['A'], ['A'], ['A'], ['A'], ['B'], ['B'], ['B'], ['C', 'Z', 'B'], ['C', 'Z', 'B']];
+  const view = tabulate(candidates, ballots);
+
+  assert.deepEqual(
+    view.rounds.map((r) => r.eliminatedThisRound),
+    [['Z'], ['C'], []],
+  );
+  assert.deepEqual(view.rounds[1].transfers, [{ from: 'C', to: 'B', votes: 2 }]);
+});
