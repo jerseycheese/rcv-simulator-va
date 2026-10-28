@@ -13,7 +13,7 @@ import { describeBallotJourney } from '@/lib/ballotJourney';
 import { buildColorMap, type ColorMap } from '@/lib/colors';
 import { traceUserBallot } from '@/lib/ballotTrace';
 import { parseSavedBallot, SAVED_BALLOT_KEY, serializeBallot } from '@/lib/savedBallot';
-import { parseRankParam, withRankParam } from '@/lib/shareUrl';
+import { consumeRankParam, withRankParam } from '@/lib/shareUrl';
 import { RoundCard } from './RoundCard';
 import { MethodComparison } from './MethodComparison';
 
@@ -77,8 +77,11 @@ export function Simulator({
     const candidateNames = candidates.map((c) => c.name);
     const saved = parseSavedBallot(raw, candidateNames);
     // A shared link's ranking wins over the saved one; saved renames still apply.
-    const shared = parseRankParam(window.location.search, candidateNames);
-    const order = shared.length > 0 ? shared : saved?.order;
+    // The param is dropped once applied so later edits survive a refresh;
+    // submit() puts it back for sharing.
+    const shared = consumeRankParam(window.location.href, candidateNames);
+    if (shared.cleanHref) window.history.replaceState(null, '', shared.cleanHref);
+    const order = shared.order.length > 0 ? shared.order : saved?.order;
     if (order) {
       setRanks(Object.fromEntries(order.map((name, i) => [name, i + 1])));
     }
