@@ -62,7 +62,7 @@ DESIGN.md         palette tokens, typography, and the accessibility floor
 
 ## Known failure modes
 
-- Port already in use → dev.sh frees its own computed port via kill-port.sh; if something else squats on it, `lsof -iTCP:<port>` and deal with that process.
+- Port already in use → kill-port.sh stops this checkout's own old `next dev` (SIGTERM, then SIGKILL). Any other listener makes `npm run dev` exit and print what owns the port; deal with that process or set `PORT`. Clients of the port are never touched.
 - Hydration warnings → some were deliberately suppressed; check git history before "fixing" them.
 
 ## Pointers
