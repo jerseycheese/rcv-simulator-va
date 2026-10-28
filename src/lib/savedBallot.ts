@@ -1,3 +1,5 @@
+import { consumeRankParam } from './shareUrl.ts';
+
 // The in-progress ballot, saved to localStorage so a refresh or a long
 // interruption doesn't wipe it. Keys are the original (stable) candidate names.
 export type SavedBallot = {
@@ -46,4 +48,31 @@ export function parseSavedBallot(
   }
 
   return { order: savedOrder, names: savedNames };
+}
+
+// What the page loads with: a shared link's ranking wins over the saved one,
+// but saved renames still apply. `cleanHref` is the URL with the link's param
+// dropped (null when there was none), so later edits survive a refresh.
+export function restoreBallot(
+  raw: string | null,
+  href: string,
+  candidateNames: string[]
+): SavedBallot & { cleanHref: string | null } {
+  const saved = parseSavedBallot(raw, candidateNames);
+  const shared = consumeRankParam(href, candidateNames);
+  return {
+    order: shared.order.length > 0 ? shared.order : (saved?.order ?? []),
+    names: saved?.names ?? {},
+    cleanHref: shared.cleanHref,
+  };
+}
+
+// A ballot worth keeping has a ranking or a rename. Anything else clears the
+// saved copy (null), so an emptied ballot doesn't come back on refresh.
+export function ballotToSave(
+  ballot: SavedBallot,
+  candidateNames: string[]
+): SavedBallot | null {
+  const isRenamed = candidateNames.some((name) => ballot.names[name] !== name);
+  return ballot.order.length === 0 && !isRenamed ? null : ballot;
 }

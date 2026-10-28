@@ -14,3 +14,11 @@ test('final round only claims a majority when there is a winner', () => {
   assert.match(describeFinalRound(null), /ends in a tie/);
   assert.doesNotMatch(describeFinalRound(null), /has crossed/);
 });
+
+test('names one, two, or several eliminated candidates in plain English', () => {
+  assert.match(describeRoundTransfer(['Carmen Ortiz']), /^Carmen Ortiz was out/);
+  assert.match(
+    describeRoundTransfer(['Aisha Patel', 'Carmen Ortiz', 'Dale Hutchins']),
+    /^Aisha Patel, Carmen Ortiz, and Dale Hutchins were out/,
+  );
+});
