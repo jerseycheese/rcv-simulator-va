@@ -219,6 +219,11 @@ export function tabulate(
   };
 }
 
+// The candidate a ballot counts for: its highest-ranked choice still in the race.
+export function currentChoice(ballot: Ballot, eliminated: Set<string>): string | undefined {
+  return ballot.find((name) => !eliminated.has(name));
+}
+
 function buildTransfers(
   ballots: Ballot[],
   eliminatedBeforeRound: Set<string>,
@@ -230,18 +235,18 @@ function buildTransfers(
   const counts = new Map<string, TransferView>();
 
   for (const ballot of ballots) {
-    const currentChoice = ballot.find((name) => !eliminatedBeforeRound.has(name));
-    if (!currentChoice || !eliminatedThisRound.includes(currentChoice)) continue;
+    const current = currentChoice(ballot, eliminatedBeforeRound);
+    if (!current || !eliminatedThisRound.includes(current)) continue;
 
-    const nextChoice = ballot.find((name) => !eliminatedAfterRound.has(name)) ?? null;
+    const next = currentChoice(ballot, eliminatedAfterRound) ?? null;
     // Structural key so candidate names containing "->" or the literal
     // "stopped" can't collide distinct transfer paths (names are user-editable).
-    const key = JSON.stringify([currentChoice, nextChoice]);
+    const key = JSON.stringify([current, next]);
     const existing = counts.get(key);
     if (existing) {
       existing.votes += 1;
     } else {
-      counts.set(key, { from: currentChoice, to: nextChoice, votes: 1 });
+      counts.set(key, { from: current, to: next, votes: 1 });
     }
   }
 

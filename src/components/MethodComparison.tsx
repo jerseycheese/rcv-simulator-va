@@ -1,5 +1,7 @@
 import type { ElectionView, PluralityView } from '@/lib/election';
 import type { ColorMap } from '@/lib/colors';
+import { formatNames } from '@/lib/roundExplanation';
+import { Swatch } from './Swatch';
 
 // Side-by-side scoreboard: the same ballots counted two ways. Plurality (first
 // choices only) on the left, ranked-choice on the right, and the takeaway —
@@ -47,11 +49,7 @@ export function MethodComparison({
                 <li key={t.name} className="rcv-plurality-row">
                   <div className="flex items-center justify-between gap-2 text-sm">
                     <span className="flex min-w-0 items-center gap-1.5">
-                      <span
-                        className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
-                        style={{ backgroundColor: colorMap[t.name] }}
-                        aria-hidden="true"
-                      />
+                      <Swatch color={colorMap[t.name]} size="sm" />
                       <span className={isLeader ? 'font-semibold text-ink' : 'text-ink-soft'}>
                         {t.name}
                       </span>
@@ -75,7 +73,7 @@ export function MethodComparison({
                 first-choice votes, and the count stops there.
               </>
             ) : plurality.tieOptions ? (
-              <>Tied for the lead: {plurality.tieOptions.join(', ')}. Plurality can&apos;t break it.</>
+              <>Tied for the lead: {formatNames(plurality.tieOptions)}. Plurality can&apos;t break it.</>
             ) : (
               <>No first-choice votes to count.</>
             )}
@@ -106,7 +104,7 @@ export function MethodComparison({
             </div>
           ) : (
             <p className="rcv-method-rcv-tie mt-3 text-ink">
-              Tie between: {rcv.tieOptions?.join(', ')}.
+              Tie between: {formatNames(rcv.tieOptions ?? [])}.
             </p>
           )}
           <p className="rcv-method-rcv-note mt-4 border-t border-rule pt-3 text-sm text-ink-soft">

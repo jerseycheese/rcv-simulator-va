@@ -84,3 +84,22 @@ test('skips a zero-first-choice candidate the library already dropped', () => {
   assert.ok(!journey.steps.some((step) => step.includes('moved to Z')), journey.steps.join(' | '));
   assert.ok(journey.steps.some((step) => step.includes('moved to B')), journey.steps.join(' | '));
 });
+
+test('lists three skipped choices with commas, matching the round card', () => {
+  const round = (n: number, out: string[]) => ({
+    round: n,
+    tallies: [],
+    eliminatedThisRound: out,
+    transfers: [],
+    totalActiveBallots: 0,
+    threshold: 0,
+  });
+  const rounds = [round(1, ['B', 'C', 'D']), round(2, ['A']), round(3, [])];
+
+  const journey = describeBallotJourney(['A', 'B', 'C', 'D', 'E'], rounds, 'E');
+
+  assert.ok(
+    journey.steps.includes('B, C, and D were already out, so your vote moved to E in round 3.'),
+    journey.steps.join('\n'),
+  );
+});

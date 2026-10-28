@@ -1,6 +1,7 @@
 import type { RoundView } from '@/lib/election';
 import type { ColorMap } from '@/lib/colors';
 import { describeFinalRound, describeRoundTransfer } from '@/lib/roundExplanation';
+import { Swatch } from './Swatch';
 
 export function RoundCard({
   round,
@@ -179,15 +180,5 @@ export function RoundCard({
         </p>
       )}
     </section>
-  );
-}
-
-function Swatch({ color }: { color: string }) {
-  return (
-    <span
-      className="rcv-swatch h-3 w-3 shrink-0 rounded-[2px]"
-      style={{ backgroundColor: color }}
-      aria-hidden="true"
-    />
   );
 }
