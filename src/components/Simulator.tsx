@@ -16,6 +16,7 @@ import { parseSavedBallot, SAVED_BALLOT_KEY, serializeBallot } from '@/lib/saved
 import { consumeRankParam, withRankParam } from '@/lib/shareUrl';
 import { RoundCard } from './RoundCard';
 import { MethodComparison } from './MethodComparison';
+import { Swatch } from './Swatch';
 
 type Ranks = Record<string, number | undefined>;
 type CandidateNames = Record<string, string>;
@@ -109,7 +110,8 @@ export function Simulator({
   // Colors are keyed by the original (stable) name so a candidate keeps the
   // same hue no matter what it's renamed to.
   const colorMap = buildColorMap(candidates);
-  const rankedCount = Object.values(ranks).filter((r) => typeof r === 'number').length;
+  const ranked = rankedOrder(ranks);
+  const rankedCount = ranked.length;
 
   // Original name -> effective display name (trimmed, falls back to original).
   const effectiveName: CandidateNames = Object.fromEntries(
@@ -122,10 +124,7 @@ export function Simulator({
   const reservedNames = new Set(effectiveList.filter(isReservedCandidateName));
   const canSubmit = rankedCount > 0 && duplicateNames.size === 0 && reservedNames.size === 0;
 
-  const userBallot: Ballot = candidates
-    .filter((c) => typeof ranks[c.name] === 'number')
-    .sort((a, b) => (ranks[a.name] as number) - (ranks[b.name] as number))
-    .map((c) => effectiveName[c.name]);
+  const userBallot: Ballot = ranked.map((name) => effectiveName[name]);
 
   // Clicking an unranked candidate appends them at the end of the ballot. Once
   // ranked, the per-candidate menu (changeRank) owns reordering and removal —
@@ -195,11 +194,7 @@ export function Simulator({
               {userBallot.map((name, i) => (
                 <li key={name} className="flex items-center gap-1.5">
                   <span className="font-mono text-xs font-semibold text-ink">{i + 1}</span>
-                  <span
-                    className="h-2.5 w-2.5 rounded-[2px]"
-                    style={{ backgroundColor: resultColors[name] }}
-                    aria-hidden="true"
-                  />
+                  <Swatch color={resultColors[name]} size="sm" />
                   {name}
                 </li>
               ))}
@@ -295,11 +290,7 @@ export function Simulator({
           const meta = (
             <>
               <span className="rcv-candidate-name flex items-center gap-1.5 font-semibold text-ink">
-                <span
-                  className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
-                  style={{ backgroundColor: color }}
-                  aria-hidden="true"
-                />
+                <Swatch color={color} size="sm" />
                 {effectiveName[c.name]}
               </span>
               <span className="rcv-candidate-blurb mt-0.5 block text-xs text-ink-soft">
@@ -434,11 +425,7 @@ function Legend({ items }: { items: { name: string; color: string }[] }) {
       </span>
       {items.map((item, i) => (
         <span key={i} className="flex items-center gap-1.5 text-xs font-medium text-ink">
-          <span
-            className="h-2.5 w-2.5 rounded-[2px]"
-            style={{ backgroundColor: item.color }}
-            aria-hidden="true"
-          />
+          <Swatch color={item.color} size="sm" />
           {item.name}
         </span>
       ))}
