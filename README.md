@@ -17,7 +17,7 @@ After surveying the open-source RCV landscape (FairVote, NYC Civic Engagement Co
 - Sample election (4 fictional candidates) with a ranked ballot interface.
 - User ranks candidates 1–N.
 - Submit runs round-by-round elimination, shows tallies and who got eliminated each round.
-- Plain-language explanation per round ("Candidate X had the fewest first-choice votes, so their ballots get redistributed to each voter's second choice.").
+- Plain-language explanation per round ("Candidate X was out after this round. If a voter ranked someone still in the race, the ballot moves to that person. If not, the ballot stops.").
 - Mobile-responsive, static-deployed.
 
 Stretch: custom candidate lists, embed-friendly version any org can drop into their site.

@@ -1,16 +1,18 @@
 import type { RoundView } from '@/lib/election';
 import type { ColorMap } from '@/lib/colors';
-import { describeRoundTransfer } from '@/lib/roundExplanation';
+import { describeFinalRound, describeRoundTransfer } from '@/lib/roundExplanation';
 
 export function RoundCard({
   round,
   isFinalRound,
+  winner,
   colorMap,
   maxScale,
   youSupport,
 }: {
   round: RoundView;
   isFinalRound: boolean;
+  winner: string | null;
   colorMap: ColorMap;
   maxScale: number;
   youSupport: string | null;
@@ -157,7 +159,7 @@ export function RoundCard({
                     ) : (
                       <>
                         <span className="rcv-hatch h-3 w-3 shrink-0 rounded-[2px] bg-eliminated" />
-                        <span className="italic text-ink-soft">exhausted</span>
+                        <span className="min-w-0 break-words italic text-ink-soft">stopped (no one left on the ballot)</span>
                       </>
                     )}
                     <span className="ml-auto shrink-0 font-mono text-xs font-semibold tabular-nums text-ink">
@@ -173,7 +175,7 @@ export function RoundCard({
 
       {isFinalRound && (
         <p className="rcv-round-explanation mt-4 text-sm leading-relaxed text-ink-soft">
-          A candidate has crossed the majority line. The count stops here.
+          {describeFinalRound(winner)}
         </p>
       )}
     </section>
