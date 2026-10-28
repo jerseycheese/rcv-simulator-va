@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseRankParam, withRankParam } from '../src/lib/shareUrl.ts';
+import { consumeRankParam, parseRankParam, withRankParam } from '../src/lib/shareUrl.ts';
 
 const candidates = ['Aisha Patel', 'Brent Walker', 'Carmen Ortiz', 'Dale Hutchins'];
 const base = 'https://example.org/rcv-simulator-va/';
@@ -20,4 +20,13 @@ test('drops unknown names and repeats instead of erroring', () => {
 test('an empty ranking removes the param and keeps the path', () => {
   const href = withRankParam(`${base}?r=Aisha+Patel&x=1`, []);
   assert.equal(href, `${base}?x=1`);
+});
+
+test('a shared link seeds once, then the saved ballot wins on the next load', () => {
+  const first = consumeRankParam(`${base}?r=Aisha+Patel&x=1`, candidates);
+  assert.deepEqual(first.order, ['Aisha Patel']);
+  assert.equal(first.cleanHref, `${base}?x=1`);
+
+  const second = consumeRankParam(first.cleanHref as string, candidates);
+  assert.deepEqual(second, { order: [], cleanHref: null });
 });

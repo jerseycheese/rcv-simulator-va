@@ -26,3 +26,18 @@ export function withRankParam(href: string, order: string[]): string {
   }
   return url.toString();
 }
+
+// A shared link seeds the ballot once. Returns the link's ranking plus the URL
+// with the param stripped (null when there was none to strip), so the next
+// load falls back to the saved ballot instead of re-applying a stale link.
+export function consumeRankParam(
+  href: string,
+  candidateNames: string[]
+): { order: string[]; cleanHref: string | null } {
+  const url = new URL(href);
+  if (!url.searchParams.has(RANK_PARAM)) return { order: [], cleanHref: null };
+  return {
+    order: parseRankParam(url.search, candidateNames),
+    cleanHref: withRankParam(href, []),
+  };
+}
