@@ -1,6 +1,6 @@
 import type { ElectionView, PluralityView } from '@/lib/election';
 import type { ColorMap } from '@/lib/colors';
-import { formatNames } from '@/lib/roundExplanation';
+import { describeUnsettledTakeaway, formatNames } from '@/lib/roundExplanation';
 import { Swatch } from './Swatch';
 
 // Side-by-side scoreboard: the same ballots counted two ways. Plurality (first
@@ -132,10 +132,7 @@ export function MethodComparison({
             so try rearranging your ballot.
           </>
         ) : (
-          <>
-            First choices alone can&apos;t settle this race, but ranked-choice keeps counting until a
-            majority forms.
-          </>
+          describeUnsettledTakeaway(pluralityWinner, rcvWinner, rcv.tieOptions)
         )}
       </p>
     </section>

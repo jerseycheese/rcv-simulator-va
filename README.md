@@ -10,7 +10,7 @@ Built for Virginia, but forks cleanly for any state.
 
 ## Why this exists
 
-After surveying the open-source RCV landscape (FairVote, NYC Civic Engagement Commission, GitHub) the voter-education shape was missing. There are tabulator libraries, results visualizers, poll-running platforms, and voting-method comparison sites — but nothing where a curious voter can rank one sample election and walk through what RCV actually does with their ballot. That's the gap this fills.
+After surveying the open-source RCV tools (FairVote, NYC Civic Engagement Commission, GitHub) the voter-education shape was missing. There are tabulator libraries, results visualizers, poll-running platforms, and voting-method comparison sites — but nothing where a curious voter can rank one sample election and walk through what RCV actually does with their ballot. That's the gap this fills.
 
 ## MVP scope
 

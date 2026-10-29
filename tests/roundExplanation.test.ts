@@ -1,6 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { describeFinalRound, describeRoundTransfer } from '../src/lib/roundExplanation.ts';
+import {
+  describeFinalRound,
+  describeRoundTransfer,
+  describeUnsettledTakeaway,
+} from '../src/lib/roundExplanation.ts';
+import { tabulate, tabulatePlurality } from '../src/lib/election.ts';
 
 test('explains why eliminated ballots move and how they are distributed', () => {
   assert.equal(
@@ -21,4 +26,22 @@ test('names one, two, or several eliminated candidates in plain English', () => 
     describeRoundTransfer(['Aisha Patel', 'Carmen Ortiz', 'Dale Hutchins']),
     /^Aisha Patel, Carmen Ortiz, and Dale Hutchins were out/,
   );
+});
+
+test('takeaway never claims an RCV majority when the ranked count ties', () => {
+  const candidates = [
+    { name: 'A', blurb: '' },
+    { name: 'B', blurb: '' },
+    { name: 'C', blurb: '' },
+  ];
+  const ballots = [['A'], ['A'], ['A'], ['B', 'C'], ['B', 'C'], ['C', 'B']];
+  const plurality = tabulatePlurality(candidates, ballots);
+  const rcv = tabulate(candidates, ballots);
+  assert.equal(plurality.winner, 'A');
+  assert.equal(rcv.winner, null);
+
+  const text = describeUnsettledTakeaway(plurality.winner, rcv.winner, rcv.tieOptions);
+  assert.doesNotMatch(text, /majority|can't settle/);
+  assert.match(text, /^A has the most first-choice votes/);
+  assert.match(text, /tie between A and B/);
 });

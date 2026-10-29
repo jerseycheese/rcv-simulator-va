@@ -10,7 +10,7 @@ Everyday voters — primarily Virginians, but the tool forks cleanly for any sta
 
 ## Product Purpose
 
-Let someone rank one sample election and watch, round by round, what happens to their ballot — with a plain-language explanation of why at every step. It fills a real gap: the open-source RCV landscape has tabulators, results visualizers, and method-comparison sites, but nothing built for a curious voter to learn by doing. Success is a voter finishing the flow and being able to explain, in their own words, how RCV moved their vote.
+Let someone rank one sample election and watch, round by round, what happens to their ballot — with a plain-language explanation of why at every step. It fills a real gap: open-source RCV tools include tabulators, results visualizers, and method-comparison sites, but nothing built for a curious voter to learn by doing. Success is a voter finishing the flow and being able to explain, in their own words, how RCV moved their vote.
 
 ## Brand Personality
 
