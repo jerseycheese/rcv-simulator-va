@@ -172,7 +172,7 @@ test('a candidate nobody ranks is marked out from round 1', () => {
   );
 });
 
-test('candidates tied for last go out one at a time, so the survivor picks up their ballots', () => {
+test('candidates tied for last go out one at a time, drawn by lot, so the survivor picks up their ballots', () => {
   const candidates = ['A', 'B', 'C'].map((name) => ({ name, blurb: '' }));
   const ballots = [
     ...Array.from({ length: 4 }, () => ['A']),
@@ -180,12 +180,20 @@ test('candidates tied for last go out one at a time, so the survivor picks up th
     ...Array.from({ length: 3 }, () => ['C', 'B']),
   ];
   const view = tabulate(candidates, ballots);
+  const out = view.rounds[0].tieBreak?.eliminated;
+  const survivor = out === 'B' ? 'C' : 'B';
 
+  assert.ok(out === 'B' || out === 'C');
+  assert.deepEqual(view.rounds[0].tieBreak, { tied: ['B', 'C'], eliminated: out });
   assert.deepEqual(
     view.rounds.map((r) => r.eliminatedThisRound),
-    [['C'], []],
+    [[out], []],
   );
-  assert.deepEqual(view.rounds[0].tieBreak, { tied: ['B', 'C'], eliminated: 'C' });
-  assert.equal(view.rounds[1].tallies.find((t) => t.name === 'B')?.votes, 6);
-  assert.equal(view.winner, 'B');
+  assert.equal(view.rounds[1].tallies.find((t) => t.name === survivor)?.votes, 6);
+  assert.equal(view.rounds[1].tallies.find((t) => t.name === 'A')?.votes, 4);
+  assert.equal(view.winner, survivor);
+
+  for (let i = 0; i < 5; i++) {
+    assert.deepEqual(tabulate(candidates, ballots).rounds[0].tieBreak, view.rounds[0].tieBreak);
+  }
 });

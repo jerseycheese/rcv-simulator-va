@@ -221,13 +221,13 @@ function rankedAnywhere(stage: Stage, name: string): boolean {
 }
 
 // When candidates tie for fewest votes, `ranked-voting` drops all of them in
-// the same round. Virginia (1VAC20-100-50) defeats one at a time and settles
-// who goes out by lot (Code of Virginia § 24.2-674), and with transfers that
-// can change the winner. So: let the library count up to that round, take out
-// one tied candidate ourselves, and hand the rest of the count back to the
-// library. Stand-in for the lot: the tied candidate listed last on the ballot
-// goes out. Ties at zero first choices are left alone, since those candidates
-// hold no ballots and dropping them together can't move a vote.
+// the same round. Virginia (1VAC20-100-40 3(b)) defeats one at a time and
+// settles which one by lot under Code of Virginia § 24.2-674, with no look-back
+// to earlier rounds; with transfers that can change the winner. So: let the
+// library count up to that round, draw one tied candidate to take out, and
+// hand the rest of the count back to the library. Ties at zero first choices
+// are left alone, since those candidates hold no ballots and dropping them
+// together can't move a vote.
 function countWithSingleEliminations(candidates: Candidate[], ballots: Ballot[]) {
   const stages: Stage[] = [];
   const tieBreaks = new Map<number, { tied: string[]; eliminated: string }>();
@@ -262,7 +262,7 @@ function countWithSingleEliminations(candidates: Candidate[], ballots: Ballot[])
     const tied = inRace
       .filter((c) => rankedAnywhere(stage, c.name) && !rankedAnywhere(next, c.name))
       .map((c) => c.name);
-    const eliminated = tied[tied.length - 1];
+    const eliminated = drawByLot(tied, candidates, ballots);
 
     stages.push(...result.stageResults.slice(0, tieAt + 1));
     tieBreaks.set(stages.length - 1, { tied, eliminated });
@@ -271,6 +271,24 @@ function countWithSingleEliminations(candidates: Candidate[], ballots: Ballot[])
     }
     removed.add(eliminated);
   }
+}
+
+// The draw is seeded from the count itself rather than Math.random, so the
+// same ballots always get the same draw: the result can't flip on a re-render
+// or reload. Ballots are keyed by candidate position, not name, so renaming a
+// candidate doesn't redraw, and sorted, so ballot order doesn't either.
+function drawByLot(tied: string[], candidates: Candidate[], ballots: Ballot[]): string {
+  const position = new Map(candidates.map((c, i) => [c.name, i]));
+  const key = [
+    tied.map((name) => position.get(name)).join(','),
+    ...ballots.map((b) => b.map((name) => position.get(name) ?? '?').join(',')).sort(),
+  ].join('|');
+  // FNV-1a: small, stable, and spreads similar inputs apart.
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < key.length; i++) {
+    hash = Math.imul(hash ^ key.charCodeAt(i), 0x01000193) >>> 0;
+  }
+  return tied[hash % tied.length];
 }
 
 // The candidate a ballot counts for: its highest-ranked choice still in the race.
