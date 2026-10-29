@@ -34,7 +34,7 @@ export function RoundCard({
           Round {round.round}
         </h3>
         <span className="font-mono text-xs text-ink-soft">
-          {round.totalActiveBallots} active · {round.threshold} to win
+          {round.totalActiveBallots} ballots still counting · {round.threshold} to win
         </span>
       </header>
 
