@@ -1,6 +1,6 @@
 import type { RoundView } from '@/lib/election';
 import type { ColorMap } from '@/lib/colors';
-import { describeFinalRound, describeRoundTransfer } from '@/lib/roundExplanation';
+import { describeFinalRound, describeRoundTransfer, describeTieBreak } from '@/lib/roundExplanation';
 import { Swatch } from './Swatch';
 
 export function RoundCard({
@@ -132,6 +132,11 @@ export function RoundCard({
 
       {round.eliminatedThisRound.length > 0 && (
         <div className="rcv-round-transfer mt-5 border-t border-rule pt-4">
+          {round.tieBreak && (
+            <p className="rcv-round-tie-break mb-2 text-sm leading-relaxed text-ink-soft">
+              {describeTieBreak(round.tieBreak.tied, round.tieBreak.eliminated)}
+            </p>
+          )}
           <p className="rcv-round-explanation text-sm leading-relaxed text-ink-soft">
             {describeRoundTransfer(round.eliminatedThisRound)}
           </p>

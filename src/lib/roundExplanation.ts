@@ -5,6 +5,11 @@ export function describeRoundTransfer(eliminatedNames: string[]): string {
   return `${names} ${verb} out after this round. They cannot win now, so each ballot that counted for them is checked. If a voter ranked someone still in the race, the ballot moves to that person. If not, the ballot stops.`;
 }
 
+// Shown when candidates tie for fewest votes and the count draws one to go out.
+export function describeTieBreak(tied: string[], eliminated: string): string {
+  return `${formatNames(tied)} tied for the fewest votes, and only one candidate goes out per round. Virginia breaks this tie by lot: the local electoral board draws in public. The simulator draws too, and this count's draw sent out ${eliminated}.`;
+}
+
 export function describeFinalRound(winner: string | null): string {
   if (winner) return 'A candidate has crossed the majority line. The count stops here.';
   return 'No one crossed the majority line, and the candidates left are tied. The count ends in a tie.';

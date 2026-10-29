@@ -20,6 +20,8 @@ export type RoundView = {
   transfers: TransferView[];
   totalActiveBallots: number;
   threshold: number;
+  // Set when candidates tied for fewest votes and one had to be picked to go out.
+  tieBreak: { tied: string[]; eliminated: string } | null;
 };
 
 export type ElectionView = {
@@ -148,16 +150,10 @@ export function tabulate(
     throw new Error(`Candidate name "${RESERVED_CANDIDATE_NAME}" is reserved and cannot be tabulated.`);
   }
 
-  const controller = new VoteController(
-    candidates.map((c) => new VoteOption(c.name)),
-  );
-  controller.acceptPopulationVotes(
-    ballots.map((b) => new UserVotes(b)),
-  );
-  const result: FinalResult = controller.getFinalResult();
+  const { stages, tieBreaks, result } = countWithSingleEliminations(candidates, ballots);
   const eliminatedBeforeRound = new Set<string>();
 
-  const rounds: RoundView[] = result.stageResults.map((stage, idx) => {
+  const rounds: RoundView[] = stages.map((stage, idx) => {
     const tallies = candidates.map((c) => {
       const counts = stage.rankedVoteCounts[c.name];
       const firstPlace = counts ? counts.voteCounts[0] : 0;
@@ -170,12 +166,6 @@ export function tabulate(
     const threshold = Math.floor(totalActive / 2) + 1;
 
     const eliminatedThisRound: string[] = [];
-    // The library strips eliminated candidates from every ballot, so a
-    // candidate still in the race keeps some count at some rank. Checking
-    // every rank (not just first choices) catches a candidate nobody ranked
-    // first, whom the library drops in round 1.
-    const rankedAnywhere = (s: typeof stage, name: string) =>
-      (s.rankedVoteCounts[name]?.voteCounts ?? []).some((n) => n > 0);
     if (idx === 0) {
       // A candidate on no ballot at all is never dropped by the library
       // (getLosers skips options with no votes), so mark them out up front.
@@ -186,7 +176,7 @@ export function tabulate(
         }
       }
     }
-    const next = result.stageResults[idx + 1];
+    const next = stages[idx + 1];
     if (next) {
       for (const t of tallies) {
         if (rankedAnywhere(stage, t.name) && !rankedAnywhere(next, t.name)) {
@@ -208,6 +198,7 @@ export function tabulate(
       transfers,
       totalActiveBallots: totalActive,
       threshold,
+      tieBreak: tieBreaks.get(idx) ?? null,
     };
   });
 
@@ -217,6 +208,87 @@ export function tabulate(
     tieOptions: result.tieOptions,
     totalVoters: result.totalNumVoters,
   };
+}
+
+type Stage = FinalResult['stageResults'][number];
+
+// The library strips eliminated candidates from every ballot, so a candidate
+// still in the race keeps some count at some rank. Checking every rank (not
+// just first choices) catches a candidate nobody ranked first, whom the
+// library drops in round 1.
+function rankedAnywhere(stage: Stage, name: string): boolean {
+  return (stage.rankedVoteCounts[name]?.voteCounts ?? []).some((n) => n > 0);
+}
+
+// When candidates tie for fewest votes, `ranked-voting` drops all of them in
+// the same round. Virginia (1VAC20-100-40 3(b)) defeats one at a time and
+// settles which one by lot under Code of Virginia § 24.2-674, with no look-back
+// to earlier rounds; with transfers that can change the winner. So: let the
+// library count up to that round, draw one tied candidate to take out, and
+// hand the rest of the count back to the library. Ties at zero first choices
+// are left alone, since those candidates hold no ballots and dropping them
+// together can't move a vote.
+function countWithSingleEliminations(candidates: Candidate[], ballots: Ballot[]) {
+  const stages: Stage[] = [];
+  const tieBreaks = new Map<number, { tied: string[]; eliminated: string }>();
+  const removed = new Set<string>();
+
+  for (;;) {
+    const inRace = candidates.filter((c) => !removed.has(c.name));
+    const controller = new VoteController(inRace.map((c) => new VoteOption(c.name)));
+    controller.acceptPopulationVotes(
+      ballots.map((b) => new UserVotes(b.filter((name) => !removed.has(name)))),
+    );
+    const result: FinalResult = controller.getFinalResult();
+
+    const tieAt = result.stageResults.findIndex((stage, i) => {
+      const next = result.stageResults[i + 1];
+      if (!next) return false;
+      const dropped = inRace.filter(
+        (c) =>
+          (stage.rankedVoteCounts[c.name]?.voteCounts[0] ?? 0) > 0 &&
+          !rankedAnywhere(next, c.name),
+      );
+      return dropped.length > 1 && inRace.some((c) => rankedAnywhere(next, c.name));
+    });
+
+    if (tieAt === -1) {
+      stages.push(...result.stageResults);
+      return { stages, tieBreaks, result };
+    }
+
+    const stage = result.stageResults[tieAt];
+    const next = result.stageResults[tieAt + 1];
+    const tied = inRace
+      .filter((c) => rankedAnywhere(stage, c.name) && !rankedAnywhere(next, c.name))
+      .map((c) => c.name);
+    const eliminated = drawByLot(tied, candidates, ballots);
+
+    stages.push(...result.stageResults.slice(0, tieAt + 1));
+    tieBreaks.set(stages.length - 1, { tied, eliminated });
+    for (const c of inRace) {
+      if (!rankedAnywhere(stage, c.name)) removed.add(c.name);
+    }
+    removed.add(eliminated);
+  }
+}
+
+// The draw is seeded from the count itself rather than Math.random, so the
+// same ballots always get the same draw: the result can't flip on a re-render
+// or reload. Ballots are keyed by candidate position, not name, so renaming a
+// candidate doesn't redraw, and sorted, so ballot order doesn't either.
+function drawByLot(tied: string[], candidates: Candidate[], ballots: Ballot[]): string {
+  const position = new Map(candidates.map((c, i) => [c.name, i]));
+  const key = [
+    tied.map((name) => position.get(name)).join(','),
+    ...ballots.map((b) => b.map((name) => position.get(name) ?? '?').join(',')).sort(),
+  ].join('|');
+  // FNV-1a: small, stable, and spreads similar inputs apart.
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < key.length; i++) {
+    hash = Math.imul(hash ^ key.charCodeAt(i), 0x01000193) >>> 0;
+  }
+  return tied[hash % tied.length];
 }
 
 // The candidate a ballot counts for: its highest-ranked choice still in the race.
