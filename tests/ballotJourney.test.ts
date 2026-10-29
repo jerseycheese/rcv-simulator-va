@@ -93,6 +93,7 @@ test('lists three skipped choices with commas, matching the round card', () => {
     transfers: [],
     totalActiveBallots: 0,
     threshold: 0,
+    tieBreak: null,
   });
   const rounds = [round(1, ['B', 'C', 'D']), round(2, ['A']), round(3, [])];
 

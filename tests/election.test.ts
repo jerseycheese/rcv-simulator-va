@@ -171,3 +171,21 @@ test('a candidate nobody ranks is marked out from round 1', () => {
     view.rounds.map(() => true),
   );
 });
+
+test('candidates tied for last go out one at a time, so the survivor picks up their ballots', () => {
+  const candidates = ['A', 'B', 'C'].map((name) => ({ name, blurb: '' }));
+  const ballots = [
+    ...Array.from({ length: 4 }, () => ['A']),
+    ...Array.from({ length: 3 }, () => ['B', 'C']),
+    ...Array.from({ length: 3 }, () => ['C', 'B']),
+  ];
+  const view = tabulate(candidates, ballots);
+
+  assert.deepEqual(
+    view.rounds.map((r) => r.eliminatedThisRound),
+    [['C'], []],
+  );
+  assert.deepEqual(view.rounds[0].tieBreak, { tied: ['B', 'C'], eliminated: 'C' });
+  assert.equal(view.rounds[1].tallies.find((t) => t.name === 'B')?.votes, 6);
+  assert.equal(view.winner, 'B');
+});
