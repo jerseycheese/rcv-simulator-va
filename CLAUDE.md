@@ -49,14 +49,14 @@ DESIGN.md         palette tokens, typography, and the accessibility floor
 ## Hard rules
 
 - Static export: no API routes, no SSR data fetching, no next/image optimization (`unoptimized: true`). Build output is `out/`.
-- Don't reimplement IRV. The `ranked-voting` npm package owns tabulation; `src/lib/election.ts` wraps it.
+- Don't reimplement IRV. The `ranked-voting` npm package counts the rounds; `src/lib/election.ts` wraps it and owns Virginia's tie-for-last rule. When candidates tie for last, `countWithSingleEliminations` draws one by lot to go out, because the library would drop them all at once. That loop is the tie rule, not a second IRV.
 - Civic neutrality: sample candidates keep non-partisan blurbs (housing, schools, parks — no parties, no ideology). Explanations stay plain-language; jargon like "exhausted ballot" gets explained in place.
 - The palette is colorblind-aware with AA contrast on the paper background (documented in globals.css). Don't introduce colors outside it.
 - Candidate names are user-editable state. Keep the prototype-pollution guard (`__proto__` keys) and collision-proof name keys — both were deliberate fixes.
 
 ## Common tasks
 
-1. Change tabulation behavior or sample data: `src/lib/election.ts`, then `npm test` (election.test.ts covers transfers, renames, and the plurality comparison).
+1. Change tabulation behavior or sample data: `src/lib/election.ts`, then `npm test` (election.test.ts covers transfers, renames, tie breaks, and the plurality comparison).
 2. Adjust round-by-round explanations: `ballotJourney.ts` / `roundExplanation.ts` plus their tests.
 3. Visual changes: stay inside the globals.css palette; verify mobile at <640px (that breakpoint had a dedicated fix pass).
 

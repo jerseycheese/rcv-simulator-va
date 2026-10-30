@@ -7,7 +7,7 @@ export function describeRoundTransfer(eliminatedNames: string[]): string {
 
 // Shown when candidates tie for fewest votes and the count draws one to go out.
 export function describeTieBreak(tied: string[], eliminated: string): string {
-  return `${formatNames(tied)} tied for the fewest votes, and only one candidate goes out per round. Virginia breaks this tie by lot: the local electoral board draws in public. The simulator draws too, and this count's draw sent out ${eliminated}.`;
+  return `${formatNames(tied)} tied for the fewest votes. Only one can go out per round, so Virginia draws lots. The simulator drew too: ${eliminated} goes out.`;
 }
 
 export function describeFinalRound(winner: string | null): string {
