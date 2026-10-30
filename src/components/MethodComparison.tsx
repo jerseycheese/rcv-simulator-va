@@ -108,7 +108,7 @@ export function MethodComparison({
             </p>
           )}
           <p className="rcv-method-rcv-note mt-4 border-t border-rule pt-3 text-sm text-ink-soft">
-            Trailing candidates drop out and their ballots move to each voter&apos;s next choice,
+            The last-place candidate drops out each round and their ballots move to each voter&apos;s next choice,
             until someone clears a majority of the ballots still in the count — yours included.
           </p>
         </div>

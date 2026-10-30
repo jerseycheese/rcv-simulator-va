@@ -26,7 +26,7 @@ Stretch: custom candidate lists, embed-friendly version any org can drop into th
 
 - Next.js 15 (App Router) with `output: 'export'` for static deployment.
 - TypeScript + Tailwind.
-- [`ranked-voting`](https://www.npmjs.com/package/ranked-voting) ([repo](https://github.com/mikey-t/ranked-voting-ts), MIT) for the IRV tabulation algorithm — no need to reimplement.
+- [`ranked-voting`](https://www.npmjs.com/package/ranked-voting) ([repo](https://github.com/mikey-t/ranked-voting-ts), MIT) counts the IRV rounds. `src/lib/election.ts` adds Virginia's rule for a tie for last: one candidate drawn by lot goes out per round, instead of all of them.
 - Local component state, no backend, no auth.
 - Deploys to GitHub Pages via Actions (`.github/workflows/deploy.yml`) on push to `main`.
 
