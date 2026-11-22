@@ -69,3 +69,13 @@ DESIGN.md         palette tokens, typography, and the accessibility floor
 
 - README.md — MVP scope, stack, and status. Live on GitHub Pages at https://jerseycheese.github.io/rcv-simulator-va/, deployed by `deploy.yml`.
 - scripts/worktree-port.cjs — the port derivation, commented.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in this repo's GitHub Issues, worked through the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context: one `GLOSSARY.md` at the repo root, with ADRs under `docs/adr/` once a decision is recorded. See `docs/agents/domain.md`.
